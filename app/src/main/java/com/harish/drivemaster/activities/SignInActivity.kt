@@ -58,7 +58,7 @@ class SignInActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    startActivity(Intent(this, WelcomeActivity::class.java))
                     finish()
                 } else {
                     // Sign in failure
