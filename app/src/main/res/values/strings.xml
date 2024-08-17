@@ -7,4 +7,6 @@
     <string name="title_activity_dashboard">DashboardActivity</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
     <string name="title_activity_levels">LevelsActivity</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

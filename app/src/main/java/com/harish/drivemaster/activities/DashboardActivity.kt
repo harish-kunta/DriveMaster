@@ -19,13 +19,6 @@ class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            // User is not signed in, navigate to the sign-in activity
-            startActivity(Intent(this, EntryActivity::class.java))
-            finish()
-        }
-
         btnStartLesson = findViewById(R.id.btnStartLesson)
         btnAchievements = findViewById(R.id.btnAchievements)
         btnLeaderboard = findViewById(R.id.btnLeaderboard)
@@ -35,7 +28,6 @@ class DashboardActivity : AppCompatActivity() {
         btnStartLesson.setOnClickListener {
             val levelsIntent = Intent(this, LevelsActivity::class.java)
             startActivity(levelsIntent)
-
         }
 
         btnAchievements.setOnClickListener {
