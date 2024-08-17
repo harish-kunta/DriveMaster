@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary colors -->
+    <color name="colorPrimary">#58CC02</color> <!-- Duolingo Green -->
+    <color name="colorPrimaryDark">#45A001</color> <!-- Darker Green -->
+    <color name="colorAccent">#FFA726</color> <!-- Orange Accent -->
+
+    <!-- Background colors -->
+    <color name="backgroundColor">#FFFFFF</color> <!-- White background -->
+    <color name="backgroundColorLight">#F0F0F0</color> <!-- Light Gray background -->
+
+    <!-- Text colors -->
+    <color name="textColorPrimary">#212121</color> <!-- Dark Gray for primary text -->
+    <color name="textColorSecondary">#757575</color> <!-- Light Gray for secondary text -->
+
+    <!-- Button colors -->
+    <color name="buttonColor">#58CC02</color> <!-- Green Button -->
+    <color name="buttonTextColor">#FFFFFF</color> <!-- White text on buttons -->
+
+    <!-- Border and shadow colors -->
+    <color name="borderColor">#E0E0E0</color> <!-- Light Gray border -->
+    <color name="shadowColor">#757575</color> <!-- Shadow color -->
+
+    <!-- Additional colors -->
+    <color name="successColor">#4CAF50</color> <!-- Green for success -->
+    <color name="errorColor">#F44336</color> <!-- Red for errors -->
+    <color name="warningColor">#FFEB3B</color> <!-- Yellow for warnings -->
+
+    <!-- Duolingo-like specific colors -->
+    <color name="duolingoLightGreen">#B8E986</color> <!-- Light Green used in UI elements -->
+    <color name="duolingoDarkGreen">#39A802</color> <!-- Dark Green for headers -->
+</resources>

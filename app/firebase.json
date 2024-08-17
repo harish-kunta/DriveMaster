@@ -1,0 +1,64 @@
+{
+  "lessons": {
+    "level1": {
+      "questions": {
+        "question1": {
+          "questionText": "What is the color of the sky?",
+          "option1": "Blue",
+          "option2": "Green",
+          "option3": "Red",
+          "option4": "Yellow",
+          "correctAnswer": "Blue"
+        },
+        "question2": {
+          "questionText": "What is 2 + 2?",
+          "option1": "3",
+          "option2": "4",
+          "option3": "5",
+          "option4": "6",
+          "correctAnswer": "4"
+        }
+      }
+    },
+    "level2": {
+      "questions": {
+        "question1": {
+          "questionText": "What is the capital of France?",
+          "option1": "Berlin",
+          "option2": "Madrid",
+          "option3": "Paris",
+          "option4": "Rome",
+          "correctAnswer": "Paris"
+        },
+        "question2": {
+          "questionText": "What is 5 * 3?",
+          "option1": "15",
+          "option2": "10",
+          "option3": "20",
+          "option4": "25",
+          "correctAnswer": "15"
+        }
+      }
+    },
+    "level3": {
+      "questions": {
+        "question1": {
+          "questionText": "What is the square root of 16?",
+          "option1": "2",
+          "option2": "4",
+          "option3": "8",
+          "option4": "16",
+          "correctAnswer": "4"
+        },
+        "question2": {
+          "questionText": "What is the chemical symbol for water?",
+          "option1": "H2O",
+          "option2": "O2",
+          "option3": "CO2",
+          "option4": "H2",
+          "correctAnswer": "H2O"
+        }
+      }
+    }
+  }
+}

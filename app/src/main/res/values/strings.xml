@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">DriveMaster</string>
+    <string name="title_activity_sign_in">SignInActivity</string>
+    <string name="title_activity_achievements">AchievementsActivity</string>
+    <string name="title_activity_leaderboard">LeaderboardActivity</string>
+    <string name="title_activity_progress">ProgressActivity</string>
+    <string name="title_activity_dashboard">DashboardActivity</string>
+    <string name="title_activity_sign_up">SignUpActivity</string>
+    <string name="title_activity_levels">LevelsActivity</string>
+</resources>
