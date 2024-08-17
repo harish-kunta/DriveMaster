@@ -1372,5 +1372,33 @@
         }
       ]
     }
+  },
+  "users": {
+    "rwjynOmgbsQ59mG131NAUCOtKbX2": {
+      "achievements": {
+        "badge1": false,
+        "badge2": false
+      },
+      "levels": {
+        "level1": true,
+        "level2": true,
+        "level3": true
+      },
+      "name": "New User",
+      "points": 120,
+      "progress": {
+        "lesson1": {
+          "completed": false,
+          "score": 0
+        },
+        "lesson2": {
+          "completed": false,
+          "score": 0
+        },
+        "level1": {
+          "completed": true
+        }
+      }
+    }
   }
 }
