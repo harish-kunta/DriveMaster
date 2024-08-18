@@ -1,4 +1,4 @@
-package com.harish.drivemaster.fragments
+package com.harish.drivemaster.main_fragments
 
 import android.content.Intent
 import android.os.Bundle

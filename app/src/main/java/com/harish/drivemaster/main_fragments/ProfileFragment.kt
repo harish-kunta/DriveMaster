@@ -1,5 +1,6 @@
-package com.harish.drivemaster.fragments
+package com.harish.drivemaster.main_fragments
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
 import com.harish.drivemaster.R
+import com.harish.drivemaster.activities.SettingsActivity
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -38,7 +40,8 @@ class ProfileFragment : Fragment() {
         settingsIcon = v.findViewById(R.id.settingsIcon)
 
         settingsIcon.setOnClickListener {
-            
+            val settingIntent = Intent(activity, SettingsActivity::class.java)
+            startActivity(settingIntent)
         }
 
         populateGrid()

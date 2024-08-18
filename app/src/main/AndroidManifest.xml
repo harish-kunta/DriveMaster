@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".DriveMaster"
@@ -17,6 +17,10 @@
         android:theme="@style/Theme.DriveMaster"
         tools:targetApi="31">
         <activity
+            android:name=".activities.SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
+        <activity
             android:name=".activities.WelcomeActivity"
             android:exported="false" />
         <activity
@@ -24,8 +28,7 @@
             android:exported="false" />
         <activity
             android:name=".activities.EntryActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"></activity>
         <activity
             android:name=".activities.LevelsActivity"
             android:exported="false"
@@ -40,8 +43,7 @@
             android:name=".activities.DashboardActivity"
             android:exported="true"
             android:label="@string/title_activity_dashboard"
-            android:theme="@style/Theme.DriveMaster">
-        </activity>
+            android:theme="@style/Theme.DriveMaster"></activity>
         <activity
             android:name=".activities.ProgressActivity"
             android:exported="false"

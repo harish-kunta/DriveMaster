@@ -6,21 +6,21 @@
 
     <fragment
         android:id="@+id/nav_learn"
-        android:name="com.harish.drivemaster.fragments.LearnFragment"
+        android:name="com.harish.drivemaster.main_fragments.LearnFragment"
         android:label="Learn" />
 
     <fragment
         android:id="@+id/nav_progress"
-        android:name="com.harish.drivemaster.fragments.ProgressFragment"
+        android:name="com.harish.drivemaster.main_fragments.ProgressFragment"
         android:label="Progress" />
 
     <fragment
         android:id="@+id/nav_leaderboard"
-        android:name="com.harish.drivemaster.fragments.LeaderboardFragment"
+        android:name="com.harish.drivemaster.main_fragments.LeaderboardFragment"
         android:label="Leaderboard" />
 
     <fragment
         android:id="@+id/nav_profile"
-        android:name="com.harish.drivemaster.fragments.ProfileFragment"
+        android:name="com.harish.drivemaster.main_fragments.ProfileFragment"
         android:label="Profile" />
 </navigation>

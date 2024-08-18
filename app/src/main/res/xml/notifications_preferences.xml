@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Feedback Form -->
+    <EditTextPreference
+        android:key="feedback_text"
+        android:title="Feedback"
+        android:summary="Provide your feedback about the app."
+        android:dialogTitle="Enter your feedback"
+        android:inputType="textMultiLine"
+        android:lines="5"
+        android:maxLines="10"
+        android:negativeButtonText="Cancel"
+        android:positiveButtonText="Submit"/>
+
+    <!-- Email Contact -->
+    <Preference
+        android:key="email_contact"
+        android:title="Email Us"
+        android:summary="Send us an email for support or questions."
+        android:widgetLayout="@layout/preference_button"/>
+
+    <!-- Contact Us Section -->
+    <PreferenceScreen
+        android:title="Contact Us"
+        android:summary="Contact our support team for further assistance."
+        >
+
+        <Preference
+            android:key="contact_email"
+            android:title="Email"
+            android:summary="support@example.com"
+            />
+
+        <Preference
+            android:key="contact_phone"
+            android:title="Phone"
+            android:summary="+123 456 7890"
+            />
+
+    </PreferenceScreen>
+
+</PreferenceScreen>
