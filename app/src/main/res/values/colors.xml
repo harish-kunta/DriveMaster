@@ -37,4 +37,6 @@
     <color name="wrongAnswerColor">#F44336</color> />
     <color name="popupCorrectBackgroundColor">#D7FFB8</color>
     <color name="popupIncorrectBackgroundColor">#FFB8B8</color>
+
+    <color name="heartColor">#F44336</color>
 </resources>

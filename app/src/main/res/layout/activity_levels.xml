@@ -25,8 +25,6 @@
         android:columnCount="3"
         android:layout_gravity="center">
 
-        <!-- Buttons will be dynamically added here -->
-
     </GridLayout>
 </LinearLayout>
 

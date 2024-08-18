@@ -1,15 +1,10 @@
 package com.harish.drivemaster.activities
 
-import android.content.Context
 import android.os.Bundle
-import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -30,6 +25,7 @@ class LessonActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var btnClose: ImageView
     private lateinit var popUpLayout: LinearLayout
+    private lateinit var tvHearts: TextView
     private val questions = ArrayList<Question>()
     private var currentQuestionIndex = 0
     private var correctAnswer: String? = null
@@ -38,6 +34,8 @@ class LessonActivity : AppCompatActivity() {
     private var selectedAnswer: String? = null
     private var selectedOptionView: View? = null
     private var isAnswered = false
+    // Hearts management
+    private var heartsLeft = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +47,7 @@ class LessonActivity : AppCompatActivity() {
         btnClose = findViewById(R.id.btnClose)
         popUpLayout = findViewById(R.id.popUpLayout)
         popupMessage = findViewById(R.id.tvPopupMessage)
+        tvHearts = findViewById(R.id.tvHearts)
 
         auth = FirebaseAuth.getInstance()
         currentLevel = intent.getStringExtra("levelId") ?: return
@@ -79,8 +78,7 @@ class LessonActivity : AppCompatActivity() {
         btnSubmit.setOnClickListener {
             if (!isAnswered) {
                 evaluateAnswer()
-            }
-            else {
+            } else {
                 showNextQuestion()
             }
 
@@ -92,6 +90,7 @@ class LessonActivity : AppCompatActivity() {
 
     private fun showNextQuestion() {
         cleanPopUp()
+        updateHeartsDisplay()
         if (currentQuestionIndex < questions.size) {
             val question = questions[currentQuestionIndex]
             tvQuestion.text = question.questionText
@@ -115,7 +114,6 @@ class LessonActivity : AppCompatActivity() {
             finish()
         }
     }
-
 
 
     private fun displayOptions(question: Question) {
@@ -169,15 +167,13 @@ class LessonActivity : AppCompatActivity() {
 
     private fun unlockNextLevel() {
         val userId = auth.currentUser!!.uid
-        val userLevelsRef =
-            FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
+        val userLevelsRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
 
-        // Get the current level index from the levelId (assuming "level1", "level2", etc.)
         val currentLevelIndex = currentLevel.replace("level", "").toIntOrNull() ?: return
         val nextLevelIndex = currentLevelIndex + 1
         val nextLevel = "level$nextLevelIndex"
 
-        userLevelsRef.child(nextLevel).setValue(true)
+        userLevelsRef.child(nextLevel).child("unlocked").setValue(true)
     }
 
     private fun updateProgressBar() {
@@ -191,9 +187,28 @@ class LessonActivity : AppCompatActivity() {
             updatePoints(10)
             updateCheckButton(true)
         } else {
+            loseHeart()
             showAnswerPopup(false)
             updateCheckButton(false)
         }
+    }
+
+    private fun loseHeart() {
+        heartsLeft--
+        updateHeartsDisplay()
+
+        if (heartsLeft <= 0) {
+            restartGame()
+        }
+    }
+
+    private fun restartGame() {
+        Toast.makeText(this, "You've lost all hearts! Restarting the game.", Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
+    private fun updateHeartsDisplay() {
+        tvHearts.text = heartsLeft.toString()
     }
 
     private fun cleanPopUp() {
@@ -207,12 +222,22 @@ class LessonActivity : AppCompatActivity() {
         if (isCorrect) {
             popupMessage.text = "Correct Answer!"
             popupMessage.setTextColor(ContextCompat.getColor(this, R.color.correctAnswerColor))
-            popUpLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.popupCorrectBackgroundColor))
+            popUpLayout.setBackgroundColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.popupCorrectBackgroundColor
+                )
+            )
         } else {
 
             popupMessage.text = "Wrong Answer!"
             popupMessage.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
-            popUpLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.popupIncorrectBackgroundColor))
+            popUpLayout.setBackgroundColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.popupIncorrectBackgroundColor
+                )
+            )
         }
     }
 
