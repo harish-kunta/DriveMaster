@@ -33,4 +33,8 @@
     <color name="selectedOptionColor">#DDF4FF</color>
     <color name="selectedOptionTextColor">#1899D6</color>
     <color name="unselectedOptionBorderColor">#E5E5E5</color>
+    <color name="correctAnswerColor">#58CC02</color>
+    <color name="wrongAnswerColor">#F44336</color> />
+    <color name="popupCorrectBackgroundColor">#D7FFB8</color>
+    <color name="popupIncorrectBackgroundColor">#FFB8B8</color>
 </resources>
