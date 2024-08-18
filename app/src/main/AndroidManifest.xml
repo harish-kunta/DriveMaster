@@ -28,22 +28,12 @@
             android:exported="false" />
         <activity
             android:name=".activities.EntryActivity"
-            android:exported="true"></activity>
-        <activity
-            android:name=".activities.LevelsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_levels"
-            android:theme="@style/Theme.DriveMaster" />
+            android:exported="true" />
         <activity
             android:name=".activities.SignUpActivity"
             android:exported="false"
             android:label="@string/title_activity_sign_up"
             android:theme="@style/Theme.DriveMaster" />
-        <activity
-            android:name=".activities.DashboardActivity"
-            android:exported="true"
-            android:label="@string/title_activity_dashboard"
-            android:theme="@style/Theme.DriveMaster"></activity>
         <activity
             android:name=".activities.ProgressActivity"
             android:exported="false"

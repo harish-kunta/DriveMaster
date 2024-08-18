@@ -2,45 +2,42 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Account Settings Category -->
-    <PreferenceCategory
-        android:title="Account Settings">
+    <PreferenceCategory android:title="Account Settings">
 
         <PreferenceScreen
-            android:title="Preferences"
+            android:fragment=".PreferencesFragment"
             android:summary="Sound effects, haptic feedback, etc."
-            android:fragment=".PreferencesFragment" />
+            android:title="Preferences" />
 
         <PreferenceScreen
-            android:title="Profile"
+            android:fragment=".settings_fragments.ProfileFragment"
             android:summary="Change name, password, phone number, etc."
-            android:fragment=".settings_fragments.ProfileFragment" />
+            android:title="Profile" />
 
         <PreferenceScreen
-            android:title="Notifications"
+            android:fragment=".settings_fragments.NotificationsFragment"
             android:summary="Reminders, leaderboards, etc."
-            android:fragment=".settings_fragments.NotificationsFragment" />
+            android:title="Notifications" />
 
     </PreferenceCategory>
 
     <!-- Support Settings Category -->
-    <PreferenceCategory
-        android:title="Support Settings">
+    <PreferenceCategory android:title="Support Settings">
 
         <PreferenceScreen
-            android:title="Help Center"
-            android:fragment=".settings_fragments.HelpCenterFragment" />
+            android:fragment=".settings_fragments.HelpCenterFragment"
+            android:title="Help Center" />
 
         <PreferenceScreen
-            android:title="Feedback"
-            android:fragment=".settings_fragments.FeedbackFragment" />
+            android:fragment=".settings_fragments.FeedbackFragment"
+            android:title="Feedback" />
 
     </PreferenceCategory>
 
     <!-- Sign Out Button -->
     <Preference
         android:key="sign_out"
-        android:title="Sign Out"
         android:summary="Log out of your account"
+        android:title="Sign Out"
         android:widgetLayout="@layout/preference_button" />
-
 </PreferenceScreen>

@@ -39,4 +39,9 @@
     <color name="popupIncorrectBackgroundColor">#FFB8B8</color>
 
     <color name="heartColor">#F44336</color>
+
+    <!-- Colors for locked tile -->
+    <color name="colorGray">#B0BEC5</color>
+    <color name="colorGrayDark">#90A4AE</color>
+    <color name="colorGrayLight">#CFD8DC</color>
 </resources>

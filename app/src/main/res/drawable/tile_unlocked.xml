@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- State for when the tile is pressed -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/colorPrimaryDark" />
+            <corners android:radius="8dp" />
+            <stroke android:width="2dp" android:color="@color/colorAccent" />
+        </shape>
+    </item>
+    <!-- Default state for unlocked tile -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/colorPrimary" />
+            <corners android:radius="8dp" />
+            <stroke android:width="2dp" android:color="@color/colorAccent" />
+        </shape>
+    </item>
+</selector>

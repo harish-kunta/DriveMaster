@@ -32,5 +32,11 @@ class EntryActivity : AppCompatActivity() {
             val notificationIntent = Intent(this, NotificationsActivity::class.java)
             startActivity(notificationIntent)
         }
+
+        btnSignIn.setOnClickListener {
+            val signInIntent = Intent(this, SignInActivity::class.java)
+            startActivity(signInIntent)
+        }
+
     }
 }
