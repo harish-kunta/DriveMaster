@@ -3,6 +3,7 @@ package com.harish.drivemaster.activities
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -20,6 +21,7 @@ class LessonActivity : AppCompatActivity() {
     private lateinit var tvQuestion: TextView
     private lateinit var rgOptions: RadioGroup
     private lateinit var btnSubmit: Button
+    private lateinit var progressBar: ProgressBar
     private val questions = ArrayList<Question>()
     private var currentQuestionIndex = 0
     private var correctAnswer: String? = null
@@ -33,12 +35,13 @@ class LessonActivity : AppCompatActivity() {
         tvQuestion = findViewById(R.id.tvQuestion)
         rgOptions = findViewById(R.id.rgOptions)
         btnSubmit = findViewById(R.id.btnSubmit)
+        progressBar = findViewById(R.id.progressBar)
 
         auth = FirebaseAuth.getInstance()
         currentLevel = intent.getStringExtra("levelId") ?: return
 
         // Fetch questions from Firebase
-        val questionsRef = FirebaseDatabase.getInstance().getReference("lessons").child(currentLevel)
+        val questionsRef = FirebaseDatabase.getInstance().getReference("lessons").child("level"+currentLevel)
             .child("questions")
         questionsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -47,6 +50,7 @@ class LessonActivity : AppCompatActivity() {
                     val question = questionSnapshot.getValue(Question::class.java)
                     question?.let { questions.add(it) }
                 }
+                updateProgressBar()
                 showNextQuestion()
             }
 
@@ -100,6 +104,7 @@ class LessonActivity : AppCompatActivity() {
             correctAnswer = question.correctAnswer
             // Reset RadioGroup selection
             rgOptions.clearCheck()
+            updateProgressBar()
             currentQuestionIndex++
         } else {
             updateLevelCompletion()
@@ -156,5 +161,10 @@ class LessonActivity : AppCompatActivity() {
         val nextLevel = "level$nextLevelIndex"
 
         userLevelsRef.child(nextLevel).setValue(true)
+    }
+
+    private fun updateProgressBar() {
+        val progress = ((currentQuestionIndex.toDouble() / questions.size) * 100).toInt()
+        progressBar.progress = progress
     }
 }
