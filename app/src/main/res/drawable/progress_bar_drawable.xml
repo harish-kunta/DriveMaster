@@ -5,7 +5,7 @@
     <item android:id="@android:id/background">
         <shape>
             <corners android:radius="10dp" />
-            <solid android:color="#E0E0E0" /> <!-- Light gray background -->
+            <solid android:color="#E5E5E5" /> <!-- Light gray background -->
         </shape>
     </item>
 
@@ -15,8 +15,8 @@
             <shape>
                 <corners android:radius="10dp" />
                 <gradient
-                    android:startColor="#00C853"
-                    android:endColor="#B2FF59"
+                    android:startColor="#FFC800"
+                    android:endColor="#FFC800"
                     android:angle="270" />
             </shape>
         </clip>

@@ -2,10 +2,11 @@ package com.harish.drivemaster.activities
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +20,6 @@ import com.harish.drivemaster.R
 class LessonActivity : AppCompatActivity() {
 
     private lateinit var tvQuestion: TextView
-    private lateinit var rgOptions: RadioGroup
     private lateinit var btnSubmit: Button
     private lateinit var progressBar: ProgressBar
     private val questions = ArrayList<Question>()
@@ -27,15 +27,17 @@ class LessonActivity : AppCompatActivity() {
     private var correctAnswer: String? = null
     private lateinit var auth: FirebaseAuth
     private lateinit var currentLevel: String
+    private var selectedAnswer: String? = null
+    private var selectedOptionView: View? = null
+    private lateinit var btnClose : ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lesson)
-
         tvQuestion = findViewById(R.id.tvQuestion)
-        rgOptions = findViewById(R.id.rgOptions)
         btnSubmit = findViewById(R.id.btnSubmit)
         progressBar = findViewById(R.id.progressBar)
+        btnClose = findViewById(R.id.btnClose)
 
         auth = FirebaseAuth.getInstance()
         currentLevel = intent.getStringExtra("levelId") ?: return
@@ -61,18 +63,10 @@ class LessonActivity : AppCompatActivity() {
         })
 
         btnSubmit.setOnClickListener {
-            val selectedId = rgOptions.checkedRadioButtonId
-            val selectedRadioButton = findViewById<RadioButton>(selectedId)
-            val selectedAnswer = selectedRadioButton.text.toString()
-
-            if (selectedAnswer == correctAnswer) {
-                Toast.makeText(this@LessonActivity, "Correct Answer!", Toast.LENGTH_SHORT).show()
-                updatePoints(10) // Award 10 points
-                showNextQuestion()
-            } else {
-                Toast.makeText(this@LessonActivity, "Wrong Answer! Try Again.", Toast.LENGTH_SHORT)
-                    .show()
-            }
+            evaluateAnswer()
+        }
+        btnClose.setOnClickListener {
+            finish()
         }
     }
 
@@ -87,23 +81,8 @@ class LessonActivity : AppCompatActivity() {
             )
             Log.d("LessonActivity", "Correct Answer: ${question.correctAnswer}")
 
-            // Ensure there are exactly 4 RadioButtons
-            if (rgOptions.childCount >= 4) {
-                (rgOptions.getChildAt(0) as RadioButton).text = question.option1
-                (rgOptions.getChildAt(1) as RadioButton).text = question.option2
-                (rgOptions.getChildAt(2) as RadioButton).text = question.option3
-                (rgOptions.getChildAt(3) as RadioButton).text = question.option4
-            } else {
-                Log.e(
-                    "LessonActivity",
-                    "RadioGroup does not contain the expected number of RadioButtons."
-                )
-                // Handle this scenario appropriately
-            }
-
             correctAnswer = question.correctAnswer
-            // Reset RadioGroup selection
-            rgOptions.clearCheck()
+            displayOptions(question)
             updateProgressBar()
             currentQuestionIndex++
         } else {
@@ -113,6 +92,33 @@ class LessonActivity : AppCompatActivity() {
                 .show()
             finish()
         }
+    }
+
+    private fun displayOptions(question: Question) {
+        val optionsContainer = findViewById<LinearLayout>(R.id.optionsContainer)
+        optionsContainer.removeAllViews()
+        val options = listOf(question.option1, question.option2, question.option3, question.option4)
+
+        for (option in options) {
+            val optionView = layoutInflater.inflate(R.layout.custom_option, optionsContainer, false)
+            val tvOptionText = optionView.findViewById<TextView>(R.id.tvOptionText)
+            tvOptionText.text = option
+
+            optionView.setOnClickListener {
+                selectedAnswer = option
+                highlightSelectedOption(optionView)
+            }
+
+            optionsContainer.addView(optionView)
+        }
+    }
+
+    private fun highlightSelectedOption(selectedView: View) {
+        selectedOptionView?.setBackgroundResource(R.drawable.option_background_unselected)
+        selectedView.setBackgroundResource(R.drawable.option_background_selected)
+        val tvOptionText = selectedView.findViewById<TextView>(R.id.tvOptionText)
+        tvOptionText.setTextColor(resources.getColor(R.color.selectedOptionTextColor))
+        selectedOptionView = selectedView
     }
 
     data class Question(
@@ -166,5 +172,16 @@ class LessonActivity : AppCompatActivity() {
     private fun updateProgressBar() {
         val progress = ((currentQuestionIndex.toDouble() / questions.size) * 100).toInt()
         progressBar.progress = progress
+    }
+
+    private fun evaluateAnswer() {
+        if (selectedAnswer == correctAnswer) {
+            Toast.makeText(this@LessonActivity, "Correct Answer!", Toast.LENGTH_SHORT).show()
+            updatePoints(10)
+            showNextQuestion()
+        } else {
+            Toast.makeText(this@LessonActivity, "Wrong Answer! Try Again.", Toast.LENGTH_SHORT)
+                .show()
+        }
     }
 }

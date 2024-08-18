@@ -11,7 +11,7 @@
 
     <!-- Text colors -->
     <color name="textColorPrimary">#212121</color> <!-- Dark Gray for primary text -->
-    <color name="textColorSecondary">#757575</color> <!-- Light Gray for secondary text -->
+    <color name="textColorSecondary">#4B4B4B</color> <!-- Light Gray for secondary text -->
 
     <!-- Button colors -->
     <color name="buttonColor">#58CC02</color> <!-- Green Button -->
@@ -29,4 +29,8 @@
     <!-- Duolingo-like specific colors -->
     <color name="duolingoLightGreen">#B8E986</color> <!-- Light Green used in UI elements -->
     <color name="duolingoDarkGreen">#39A802</color> <!-- Dark Green for headers -->
+    
+    <color name="selectedOptionColor">#DDF4FF</color>
+    <color name="selectedOptionTextColor">#1899D6</color>
+    <color name="unselectedOptionBorderColor">#E5E5E5</color>
 </resources>
