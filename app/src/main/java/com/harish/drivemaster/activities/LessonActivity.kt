@@ -108,7 +108,6 @@ class LessonActivity : AppCompatActivity() {
             currentQuestionIndex++
         } else {
             updateLevelCompletion()
-            unlockNextLevel()
             Toast.makeText(this@LessonActivity, "You've completed the lesson!", Toast.LENGTH_SHORT)
                 .show()
             finish()
@@ -156,24 +155,28 @@ class LessonActivity : AppCompatActivity() {
     }
 
     private fun updateLevelCompletion() {
-        val userId = auth.currentUser?.uid
-        userId?.let {
-            val userProgressRef =
-                FirebaseDatabase.getInstance().getReference("users").child(it).child("progress")
-                    .child(currentLevel)
-            userProgressRef.child("completed").setValue(true)
-        }
+        val userId = auth.currentUser?.uid ?: return
+        val userProgressRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
+
+        // Mark current level as completed
+        userProgressRef.child(currentLevel).child("completed").setValue(true)
+
+        // Unlock the next level
+        unlockNextLevel()
     }
 
     private fun unlockNextLevel() {
-        val userId = auth.currentUser!!.uid
+        val userId = auth.currentUser?.uid ?: return
         val userLevelsRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
 
         val currentLevelIndex = currentLevel.replace("level", "").toIntOrNull() ?: return
-        val nextLevelIndex = currentLevelIndex + 1
-        val nextLevel = "level$nextLevelIndex"
+        if (currentLevelIndex < 15) {
+            val nextLevelIndex = currentLevelIndex + 1
+            val nextLevel = "level$nextLevelIndex"
 
-        userLevelsRef.child(nextLevel).child("unlocked").setValue(true)
+            // Unlock next level
+            userLevelsRef.child(nextLevel).child("unlocked").setValue(true)
+        }
     }
 
     private fun updateProgressBar() {

@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.GridLayout
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,7 +23,8 @@ import com.harish.drivemaster.activities.LessonActivity
 class LearnFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: DatabaseReference
+    private lateinit var lessonsDatabase: DatabaseReference
+    private lateinit var userDatabase: DatabaseReference
     private lateinit var levelsContainer: RecyclerView
     private val levelCategories = listOf(
         "Beginner" to 1..3,
@@ -42,7 +41,8 @@ class LearnFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_learn, container, false)
         levelsContainer = view.findViewById(R.id.recyclerView)
         auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance().reference.child("lessons")
+        lessonsDatabase = FirebaseDatabase.getInstance().reference.child("lessons")
+        userDatabase = FirebaseDatabase.getInstance().reference.child("users")
 
         loadLevels() // Load levels from Firebase
 
@@ -50,7 +50,7 @@ class LearnFragment : Fragment() {
     }
 
     private fun loadLevels() {
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+        lessonsDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val levels = mutableListOf<LevelCategory>()
 
@@ -80,10 +80,46 @@ class LearnFragment : Fragment() {
         val recyclerView: RecyclerView = levelsContainer.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = LevelCategoryAdapter(levels) { level ->
-            val intent = Intent(context, LessonActivity::class.java)
-            intent.putExtra("levelId", level)
-            startActivity(intent)
+            checkLevelUnlocked(level) { isUnlocked ->
+                if (isUnlocked) {
+                    val intent = Intent(context, LessonActivity::class.java)
+                    intent.putExtra("levelId", level)
+                    startActivity(intent)
+                } else {
+                    showLockedLevelPopup()
+                }
+            }
         }
+    }
+
+    private fun checkLevelUnlocked(level: String, callback: (Boolean) -> Unit) {
+        if (level == "level1") {
+            callback(true)
+            return
+        }
+
+        val userId = auth.currentUser?.uid
+        userId?.let {
+            val userLevelsRef = userDatabase.child(it).child("levels").child(level)
+            userLevelsRef.child("unlocked").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
+                    callback(isUnlocked)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    callback(false)
+                }
+            })
+        }
+    }
+
+    private fun showLockedLevelPopup() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Level Locked")
+            .setMessage("You need to complete the previous level to unlock this one.")
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     data class LevelCategory(val category: String, val levels: List<String>)
