@@ -1,52 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/backgroundColor">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="24dp"
         android:text="Sign Up"
-        android:textSize="32sp"
         android:textColor="@color/colorPrimary"
-        android:layout_margin="24dp"/>
+        android:textSize="32sp"
+        android:textStyle="bold"/>
 
     <EditText
         android:id="@+id/etName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Name"
         android:layout_margin="16dp"
-        android:inputType="textEmailAddress"/>
+        android:hint="Name"
+        android:inputType="textPersonName" />
 
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
         android:layout_margin="16dp"
-        android:inputType="textEmailAddress"/>
+        android:hint="Email"
+        android:inputType="textEmailAddress" />
 
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
         android:layout_margin="16dp"
-        />
+        android:hint="Password"
+        android:inputType="textPassword" />
 
     <Button
         android:id="@+id/btnSignUp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign Up"
         android:layout_margin="16dp"
-        android:textColor="@android:color/white"
-        android:background="@color/buttonColor"/>
+        android:background="@color/buttonColor"
+        android:text="Sign Up"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>

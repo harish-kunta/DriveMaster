@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.harish.drivemaster.R
 
 class NotificationsActivity : AppCompatActivity() {
-    private lateinit var btnAllowNotifications : Button
+    private lateinit var btnAllowNotifications: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,7 +48,11 @@ class NotificationsActivity : AppCompatActivity() {
         builder.setNegativeButton("No") { dialog, _ ->
             dialog.dismiss()
             // Optionally, show a message explaining the decision
-            Toast.makeText(this, "Notifications are turned off. You can enable them in settings anytime.", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                "Notifications are turned off. You can enable them in settings anytime.",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         val dialog = builder.create()
@@ -88,7 +92,11 @@ class NotificationsActivity : AppCompatActivity() {
                 startActivity(Intent(this, SignInActivity::class.java))
                 finish()
             } else {
-                Toast.makeText(this, "Notifications are disabled. You can enable them in settings.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "Notifications are disabled. You can enable them in settings.",
+                    Toast.LENGTH_LONG
+                ).show()
                 // Optionally, guide the user to the app's notification settings
                 val intent = Intent()
                 intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"

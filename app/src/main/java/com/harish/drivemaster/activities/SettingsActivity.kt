@@ -20,6 +20,10 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        btnSignOut = findViewById(R.id.btnSignOut)
+        btnSignOut.setOnClickListener {
+            signOut()
+        }
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

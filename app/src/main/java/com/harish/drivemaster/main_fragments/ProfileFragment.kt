@@ -2,13 +2,19 @@ package com.harish.drivemaster.main_fragments
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.SettingsActivity
 
@@ -21,6 +27,10 @@ class ProfileFragment : Fragment() {
     private var param2: String? = null
     private lateinit var gridLayout: GridLayout
     private lateinit var settingsIcon: ImageView
+    private lateinit var userNameTextView: TextView
+    private lateinit var userEmailTextView: TextView
+    private val database = FirebaseDatabase.getInstance().reference
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,15 +48,43 @@ class ProfileFragment : Fragment() {
         val v = inflater.inflate(R.layout.fragment_profile, container, false)
         gridLayout = v.findViewById(R.id.gridLayout)
         settingsIcon = v.findViewById(R.id.settingsIcon)
+        userNameTextView = v.findViewById(R.id.userName)
+        userEmailTextView = v.findViewById(R.id.userEmail)
 
         settingsIcon.setOnClickListener {
             val settingIntent = Intent(activity, SettingsActivity::class.java)
             startActivity(settingIntent)
         }
 
+        populateUserInfo()
+
         populateGrid()
 
         return v;
+    }
+
+    private fun populateUserInfo() {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            database.child("users").child(userId).addListenerForSingleValueEvent(object :
+                ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val userName = snapshot.child("name").getValue(String::class.java)
+                    val userEmail = snapshot.child("email").getValue(String::class.java)
+
+                    // Set the values to the TextViews
+                    userNameTextView.text = userName ?: "User Name"
+                    userEmailTextView.text = userEmail ?: "user@example.com"
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle database error
+                    Toast.makeText(context, "Failed to load user info", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } else {
+            Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun populateGrid() {

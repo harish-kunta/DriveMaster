@@ -45,11 +45,6 @@
             android:label="@string/title_activity_leaderboard"
             android:theme="@style/Theme.DriveMaster" />
         <activity
-            android:name=".activities.AchievementsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_achievements"
-            android:theme="@style/Theme.DriveMaster" />
-        <activity
             android:name=".activities.SignInActivity"
             android:exported="false"
             android:label="@string/title_activity_sign_in"

@@ -67,14 +67,22 @@ class SignUpActivity : AppCompatActivity() {
                                 userRef.setValue(userData)
                                     .addOnCompleteListener { dbTask ->
                                         if (dbTask.isSuccessful) {
-                                            Toast.makeText(this, "Sign-up successful!", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this,
+                                                "Sign-up successful!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
 
                                             // Navigate to DashboardActivity or another screen
                                             val intent = Intent(this, SignInActivity::class.java)
                                             startActivity(intent)
                                             finish()
                                         } else {
-                                            Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this,
+                                                "Failed to save user data.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     }
                             }

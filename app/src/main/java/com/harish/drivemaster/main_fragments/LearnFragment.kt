@@ -101,16 +101,17 @@ class LearnFragment : Fragment() {
         val userId = auth.currentUser?.uid
         userId?.let {
             val userLevelsRef = userDatabase.child(it).child("levels").child(level)
-            userLevelsRef.child("unlocked").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
-                    callback(isUnlocked)
-                }
+            userLevelsRef.child("unlocked")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
+                        callback(isUnlocked)
+                    }
 
-                override fun onCancelled(error: DatabaseError) {
-                    callback(false)
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        callback(false)
+                    }
+                })
         }
     }
 
@@ -130,7 +131,8 @@ class LearnFragment : Fragment() {
     ) : RecyclerView.Adapter<LevelCategoryAdapter.LevelCategoryViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LevelCategoryViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
             return LevelCategoryViewHolder(view)
         }
 
@@ -143,11 +145,13 @@ class LearnFragment : Fragment() {
 
         class LevelCategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val categoryTitle: TextView = itemView.findViewById(R.id.categoryTitle)
-            private val levelsRecyclerView: RecyclerView = itemView.findViewById(R.id.levelsRecyclerView)
+            private val levelsRecyclerView: RecyclerView =
+                itemView.findViewById(R.id.levelsRecyclerView)
 
             fun bind(category: LevelCategory, onLevelSelected: (String) -> Unit) {
                 categoryTitle.text = category.category
-                levelsRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+                levelsRecyclerView.layoutManager =
+                    LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
                 levelsRecyclerView.adapter = LevelsAdapter(category.levels, onLevelSelected)
             }
         }
@@ -159,7 +163,8 @@ class LearnFragment : Fragment() {
     ) : RecyclerView.Adapter<LevelsAdapter.LevelViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LevelViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_level, parent, false)
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.item_level, parent, false)
             return LevelViewHolder(view)
         }
 
