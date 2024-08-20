@@ -12,6 +12,7 @@ import com.harish.drivemaster.R
 
 class SignUpActivity : AppCompatActivity() {
 
+    private lateinit var etName: EditText
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnSignUp: Button
@@ -22,6 +23,7 @@ class SignUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
+        etName = findViewById(R.id.etName)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         btnSignUp = findViewById(R.id.btnSignUp)
@@ -30,6 +32,7 @@ class SignUpActivity : AppCompatActivity() {
         database = FirebaseDatabase.getInstance()
 
         btnSignUp.setOnClickListener {
+            val name = etName.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
@@ -45,7 +48,8 @@ class SignUpActivity : AppCompatActivity() {
 
                                 // Initialize user data
                                 val userData = mapOf(
-                                    "name" to "New User",
+                                    "name" to name,
+                                    "email" to email,
                                     "achievements" to mapOf(
                                         "badge1" to false,
                                         "badge2" to false
@@ -56,9 +60,7 @@ class SignUpActivity : AppCompatActivity() {
                                     ),
                                     "points" to 0,
                                     "levels" to mapOf(
-                                        "level1" to true,  // First level unlocked by default
-                                        "level2" to false,
-                                        "level3" to false
+                                        "level1" to mapOf("completed" to false, "unlocked" to true)
                                     )
                                 )
 
