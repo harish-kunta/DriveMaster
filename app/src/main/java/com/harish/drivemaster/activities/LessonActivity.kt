@@ -1,6 +1,7 @@
 package com.harish.drivemaster.activities
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -19,6 +20,7 @@ import com.harish.drivemaster.R
 
 class LessonActivity : AppCompatActivity() {
 
+    // UI Components
     private lateinit var tvQuestion: TextView
     private lateinit var popupMessage: TextView
     private lateinit var tvCorrectAnswer: TextView
@@ -27,7 +29,9 @@ class LessonActivity : AppCompatActivity() {
     private lateinit var btnClose: ImageView
     private lateinit var popUpLayout: LinearLayout
     private lateinit var tvHearts: TextView
-    private val questions = ArrayList<Question>()
+
+    // Data & State Management
+    private val questions = mutableListOf<Question>()
     private var currentQuestionIndex = 0
     private var correctAnswer: String? = null
     private lateinit var auth: FirebaseAuth
@@ -43,6 +47,15 @@ class LessonActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lesson)
 
+        initializeUIComponents()
+        initializeFirebase()
+        setupEventListeners()
+
+        fetchQuestionsFromFirebase()
+    }
+
+    // Initialize UI Components
+    private fun initializeUIComponents() {
         tvQuestion = findViewById(R.id.tvQuestion)
         btnSubmit = findViewById(R.id.btnSubmit)
         progressBar = findViewById(R.id.progressBar)
@@ -51,73 +64,80 @@ class LessonActivity : AppCompatActivity() {
         popupMessage = findViewById(R.id.tvPopupMessage)
         tvCorrectAnswer = findViewById(R.id.tvCorrectAnswer)
         tvHearts = findViewById(R.id.tvHearts)
-
-        auth = FirebaseAuth.getInstance()
-        currentLevel = intent.getStringExtra("levelId") ?: return
-
         btnSubmit.isEnabled = false
+    }
 
-        // Fetch questions from Firebase
-        val questionsRef =
-            FirebaseDatabase.getInstance().getReference("lessons").child(currentLevel)
-                .child("questions")
-        questionsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                questions.clear()
-                for (questionSnapshot in dataSnapshot.children) {
-                    val question = questionSnapshot.getValue(Question::class.java)
-                    question?.let { questions.add(it) }
-                }
-                updateProgressBar()
-                showNextQuestion()
-            }
+    // Initialize Firebase
+    private fun initializeFirebase() {
+        auth = FirebaseAuth.getInstance()
+        currentLevel = intent.getStringExtra("levelId") ?: run {
+            showErrorAndExit("Invalid level ID")
+            return
+        }
+    }
 
-            override fun onCancelled(databaseError: DatabaseError) {
-                Toast.makeText(this@LessonActivity, "Failed to load questions.", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        })
-
+    // Set up event listeners for UI components
+    private fun setupEventListeners() {
         btnSubmit.setOnClickListener {
             if (!isAnswered) {
                 evaluateAnswer()
             } else {
                 showNextQuestion()
             }
-
         }
         btnClose.setOnClickListener {
             finish()
         }
     }
 
+    // Fetch questions from Firebase
+    private fun fetchQuestionsFromFirebase() {
+        val questionsRef = FirebaseDatabase.getInstance()
+            .getReference("lessons")
+            .child(currentLevel)
+            .child("questions")
+
+        questionsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                questions.clear()
+                dataSnapshot.children.mapNotNullTo(questions) { it.getValue(Question::class.java) }
+                if (questions.isNotEmpty()) {
+                    updateProgressBar()
+                    showNextQuestion()
+                } else {
+                    showErrorAndExit("No questions available for this level")
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                logAndToastError("Failed to load questions", databaseError.toException())
+            }
+        })
+    }
+
+    // Display the next question
     private fun showNextQuestion() {
         cleanPopUp()
         updateHeartsDisplay()
         if (currentQuestionIndex < questions.size) {
             val question = questions[currentQuestionIndex]
-            tvQuestion.text = question.questionText
-            correctAnswer = question.correctAnswer
-
-            displayOptions(question)
-            updateProgressBar()
-
-            selectedAnswer = null
-            selectedOptionView = null
-            btnSubmit.isEnabled = false
-            btnSubmit.text = "CHECK"
-            isAnswered = false
-
+            displayQuestion(question)
             currentQuestionIndex++
         } else {
-            updateLevelCompletion()
-            Toast.makeText(this@LessonActivity, "You've completed the lesson!", Toast.LENGTH_SHORT)
-                .show()
-            finish()
+            completeLevel()
         }
     }
 
+    // Display the question and options
+    private fun displayQuestion(question: Question) {
+        tvQuestion.text = question.questionText
+        correctAnswer = question.correctAnswer
+        displayOptions(question)
+        updateProgressBar()
+        resetAnswerSelection()
+    }
 
+    // Display the options for the question
     private fun displayOptions(question: Question) {
         val optionsContainer = findViewById<LinearLayout>(R.id.optionsContainer)
         optionsContainer.removeAllViews()
@@ -132,30 +152,132 @@ class LessonActivity : AppCompatActivity() {
                 selectedAnswer = option
                 highlightSelectedOption(optionView)
                 btnSubmit.isEnabled = true
-                btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.correctAnswerColor))
+                btnSubmit.setBackgroundColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.correctAnswerColor
+                    )
+                )
             }
 
             optionsContainer.addView(optionView)
         }
     }
 
-    private fun updatePoints(points: Int) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-        userId?.let {
-            val userRef = FirebaseDatabase.getInstance().getReference("users").child(it)
-            userRef.child("points").run {
-                addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        val currentPoints = dataSnapshot.getValue(Int::class.java) ?: 0
-                        userRef.child("points").setValue(currentPoints + points)
-                    }
-
-                    override fun onCancelled(databaseError: DatabaseError) {
-                        // Handle possible errors.
-                    }
-                })
-            }
+    // Evaluate the selected answer
+    private fun evaluateAnswer() {
+        val isCorrect = selectedAnswer == correctAnswer
+        showAnswerPopup(isCorrect)
+        if (isCorrect) {
+            updatePoints(10)
+        } else {
+            loseHeart()
         }
+        updateCheckButton(isCorrect)
+    }
+
+    // Handle losing a heart
+    private fun loseHeart() {
+        heartsLeft--
+        updateHeartsDisplay()
+        if (heartsLeft <= 0) {
+            restartGame()
+        }
+    }
+
+    // Update the display of hearts remaining
+    private fun updateHeartsDisplay() {
+        tvHearts.text = heartsLeft.toString()
+    }
+
+    // Restart the game when all hearts are lost
+    private fun restartGame() {
+        Toast.makeText(this, "You've lost all hearts! Restarting the game.", Toast.LENGTH_SHORT)
+            .show()
+        finish()
+    }
+
+    // Update the progress bar
+    private fun updateProgressBar() {
+        val progress = ((currentQuestionIndex.toDouble() / questions.size) * 100).toInt()
+        progressBar.progress = progress
+    }
+
+    // Show the popup indicating whether the answer was correct or incorrect
+    private fun showAnswerPopup(isCorrect: Boolean) {
+        popupMessage.visibility = View.VISIBLE
+        popupMessage.text = if (isCorrect) "Correct Answer!" else "Incorrect!"
+        popupMessage.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (isCorrect) R.color.correctAnswerColor else R.color.wrongAnswerColor
+            )
+        )
+        popUpLayout.setBackgroundColor(
+            ContextCompat.getColor(
+                this,
+                if (isCorrect) R.color.popupCorrectBackgroundColor else R.color.popupIncorrectBackgroundColor
+            )
+        )
+
+        if (!isCorrect) {
+            tvCorrectAnswer.visibility = View.VISIBLE
+            tvCorrectAnswer.text = "The correct answer was: $correctAnswer"
+            tvCorrectAnswer.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
+        }
+    }
+
+    // Update the "CHECK" button based on whether the answer was correct
+    private fun updateCheckButton(isCorrect: Boolean) {
+        isAnswered = true
+        btnSubmit.text = if (isCorrect) "CONTINUE" else "GOT IT"
+        btnSubmit.setBackgroundColor(
+            ContextCompat.getColor(
+                this,
+                if (isCorrect) R.color.correctAnswerColor else R.color.wrongAnswerColor
+            )
+        )
+    }
+
+    // Reset the answer selection state
+    private fun resetAnswerSelection() {
+        selectedAnswer = null
+        selectedOptionView = null
+        btnSubmit.isEnabled = false
+        btnSubmit.text = "CHECK"
+        isAnswered = false
+    }
+
+    // Highlight the selected option
+    private fun highlightSelectedOption(selectedView: View) {
+        selectedOptionView?.setBackgroundResource(R.drawable.option_background_unselected)
+        selectedView.setBackgroundResource(R.drawable.option_background_selected)
+        selectedOptionView = selectedView
+    }
+
+    // Update the user's points in Firebase
+    private fun updatePoints(points: Int) {
+        val userId = auth.currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
+
+        userRef.child("points").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val currentPoints = dataSnapshot.getValue(Int::class.java) ?: 0
+                userRef.child("points").setValue(currentPoints + points)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                logAndToastError("Failed to update points", databaseError.toException())
+            }
+        })
+    }
+
+    // Mark the current level as completed and unlock the next level
+    private fun completeLevel() {
+        updateLevelCompletion()
+        Toast.makeText(this@LessonActivity, "You've completed the lesson!", Toast.LENGTH_SHORT)
+            .show()
+        finish()
     }
 
     private fun updateLevelCompletion() {
@@ -163,64 +285,22 @@ class LessonActivity : AppCompatActivity() {
         val userProgressRef =
             FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
 
-        // Mark current level as completed
         userProgressRef.child(currentLevel).child("completed").setValue(true)
-
-        // Unlock the next level
         unlockNextLevel()
     }
 
     private fun unlockNextLevel() {
         val userId = auth.currentUser?.uid ?: return
-        val userLevelsRef =
-            FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
-
         val currentLevelIndex = currentLevel.replace("level", "").toIntOrNull() ?: return
         if (currentLevelIndex < 15) {
-            val nextLevelIndex = currentLevelIndex + 1
-            val nextLevel = "level$nextLevelIndex"
-
-            // Unlock next level
+            val nextLevel = "level${currentLevelIndex + 1}"
+            val userLevelsRef =
+                FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
             userLevelsRef.child(nextLevel).child("unlocked").setValue(true)
         }
     }
 
-    private fun updateProgressBar() {
-        val progress = ((currentQuestionIndex.toDouble() / questions.size) * 100).toInt()
-        progressBar.progress = progress
-    }
-
-    private fun evaluateAnswer() {
-        if (selectedAnswer == correctAnswer) {
-            showAnswerPopup(true)
-            updatePoints(10)
-            updateCheckButton(true)
-        } else {
-            loseHeart()
-            showAnswerPopup(false)
-            updateCheckButton(false)
-        }
-    }
-
-    private fun loseHeart() {
-        heartsLeft--
-        updateHeartsDisplay()
-
-        if (heartsLeft <= 0) {
-            restartGame()
-        }
-    }
-
-    private fun restartGame() {
-        Toast.makeText(this, "You've lost all hearts! Restarting the game.", Toast.LENGTH_SHORT)
-            .show()
-        finish()
-    }
-
-    private fun updateHeartsDisplay() {
-        tvHearts.text = heartsLeft.toString()
-    }
-
+    // Clean the popup and reset it to the default state
     private fun cleanPopUp() {
         popupMessage.visibility = View.GONE
         popupMessage.text = ""
@@ -232,59 +312,16 @@ class LessonActivity : AppCompatActivity() {
         isAnswered = false
     }
 
-    private fun showAnswerPopup(isCorrect: Boolean) {
-        popupMessage.visibility = View.VISIBLE
-        if (isCorrect) {
-            popupMessage.text = "Correct Answer!"
-            popupMessage.setTextColor(ContextCompat.getColor(this, R.color.correctAnswerColor))
-            popUpLayout.setBackgroundColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.popupCorrectBackgroundColor
-                )
-            )
-        } else {
-            popupMessage.text = "Incorrect!"
-            popupMessage.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
-            tvCorrectAnswer.visibility = View.VISIBLE
-            tvCorrectAnswer.text = "The correct answer was: $correctAnswer"
-            tvCorrectAnswer.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
-            popUpLayout.setBackgroundColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.popupIncorrectBackgroundColor
-                )
-            )
-        }
+    // Log error and show a toast message
+    private fun logAndToastError(message: String, exception: Exception) {
+        Log.e("LessonActivity", message, exception)
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun updateCheckButton(isCorrect: Boolean) {
-        isAnswered = true
-        if (isCorrect) {
-            btnSubmit.text = "CONTINUE"
-            btnSubmit.setBackgroundColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.correctAnswerColor
-                )
-            )
-        } else {
-            btnSubmit.text = "GOT IT"
-            btnSubmit.setBackgroundColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.wrongAnswerColor
-                )
-            )
-        }
-    }
-
-    private fun highlightSelectedOption(selectedView: View) {
-        selectedOptionView?.setBackgroundResource(R.drawable.option_background_unselected)
-        selectedView.setBackgroundResource(R.drawable.option_background_selected)
-        val tvOptionText = selectedView.findViewById<TextView>(R.id.tvOptionText)
-        tvOptionText.setTextColor(resources.getColor(R.color.selectedOptionTextColor))
-        selectedOptionView = selectedView
+    // Handle errors and show a message
+    private fun showErrorAndExit(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        finish()
     }
 
     data class Question(
@@ -295,4 +332,5 @@ class LessonActivity : AppCompatActivity() {
         val option4: String = "",
         val correctAnswer: String = ""
     )
+
 }
