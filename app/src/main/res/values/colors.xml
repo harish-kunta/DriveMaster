@@ -11,7 +11,8 @@
 
     <!-- Text colors -->
     <color name="textColorPrimary">#212121</color> <!-- Dark Gray for primary text -->
-    <color name="textColorSecondary">#4B4B4B</color> <!-- Light Gray for secondary text -->
+    <color name="textColorSecondary">#4B4B4B</color>
+    <color name="textColorWhite">#FFFFFF</color> <!-- Light Gray for secondary text -->
 
     <!-- Button colors -->
     <color name="buttonColor">#58CC02</color> <!-- Green Button -->

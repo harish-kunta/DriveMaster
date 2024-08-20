@@ -1,19 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?><!-- res/layout/item_level.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="8dp"
+    android:background="@drawable/tile_background"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:weightSum="1">
+
+    <ImageView
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_weight="0.8"
+        android:background="@android:color/transparent"
+        android:src="@drawable/drive_master_logo" />
 
     <TextView
         android:id="@+id/levelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/tile_background"
-        android:padding="16dp"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"/>
+        android:layout_gravity="left"
+        android:layout_margin="4dp"
+        android:layout_weight="0.1"
+        android:background="@android:color/transparent"
+        android:text="Level"
+        android:textColor="@color/textColorWhite"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/levelDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_margin="4dp"
+        android:layout_weight="0.1"
+        android:background="@android:color/transparent"
+        android:text="description"
+        android:textColor="@color/textColorWhite"
+        android:textSize="8sp" />
 </LinearLayout>
 

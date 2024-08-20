@@ -26,126 +26,65 @@ class LearnFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
-    private lateinit var levelsContainer: LinearLayout
+    private lateinit var levelsContainer: RecyclerView
+    private val levelCategories = listOf(
+        "Beginner" to 1..3,
+        "Intermediate" to 4..6,
+        "Advanced" to 7..9,
+        "Expert" to 10..12,
+        "Pro Level" to 13..15
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_learn, container, false)
+        levelsContainer = view.findViewById(R.id.recyclerView)
+        auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().reference.child("lessons")
 
-        val levels = listOf(
-            LevelCategory("Beginner", listOf("Level 1", "Level 2", "Level 3")),
-            LevelCategory("Intermediate", listOf("Level 4", "Level 5", "Level 6")),
-            LevelCategory("Advanced", listOf("Level 7", "Level 8", "Level 9")),
-            LevelCategory("Expert", listOf("Level 10", "Level 11", "Level 12")),
-            LevelCategory("Pro Level", listOf("Level 13", "Level 14", "Level 15"))
-        )
-
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = LevelCategoryAdapter(levels) { level ->
-            Toast.makeText(context, "Selected $level", Toast.LENGTH_SHORT).show()
-        }
+        loadLevels() // Load levels from Firebase
 
         return view
     }
 
-    data class LevelCategory(val category: String, val levels: List<String>)
-
-
     private fun loadLevels() {
-        database.addValueEventListener(object : ValueEventListener {
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                levelsContainer.removeAllViews()
-                val levelGroups = listOf(
-                    "Beginner" to 1..3,
-                    "Intermediate" to 4..6,
-                    "Advanced" to 7..9,
-                    "Expert" to 10..12,
-                    "Pro Level" to 13..15
-                )
+                val levels = mutableListOf<LevelCategory>()
 
-                levelGroups.forEach { (groupName, levelRange) ->
-                    // Create group header
-                    val groupHeader = TextView(requireContext()).apply {
-                        text = groupName
-                        textSize = 22f
-                        setPadding(16, 16, 16, 8)
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                        )
-                    }
-                    levelsContainer.addView(groupHeader)
-
-                    // Create grid layout for levels
-                    val gridLayout = GridLayout(requireContext()).apply {
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                        )
-                        columnCount = 3
-                        rowCount =
-                            (levelRange.count() + 2) / 3 // Adjust row count based on number of levels
-                    }
-
+                levelCategories.forEach { (categoryName, levelRange) ->
+                    val levelsInCategory = mutableListOf<String>()
                     levelRange.forEach { levelIndex ->
                         val levelId = "level$levelIndex"
-                        val levelSnapshot = snapshot.child(levelId)
-                        val levelCompleted =
-                            levelSnapshot.child("completed").getValue(Boolean::class.java) ?: false
-
-                        val levelTileView =
-                            layoutInflater.inflate(R.layout.level_tile, gridLayout, false)
-                        val tileText = levelTileView.findViewById<TextView>(R.id.tileText)
-                        tileText.text = levelId.capitalize()
-
-                        val isLevelUnlocked =
-                            levelId == "level1" || isPreviousLevelCompleted(levelId)
-                        levelTileView.isEnabled = isLevelUnlocked
-                        levelTileView.setOnClickListener {
-                            if (isLevelUnlocked) {
-                                startLessonActivity(levelId)
-                            }
+                        if (snapshot.hasChild(levelId)) {
+                            levelsInCategory.add(levelId)
                         }
-
-                        val tileBackground = if (isLevelUnlocked) {
-                            R.drawable.tile_unlocked
-                        } else {
-                            R.drawable.tile_locked
-                        }
-                        levelTileView.background = resources.getDrawable(tileBackground, null)
-
-                        gridLayout.addView(levelTileView)
                     }
-
-                    levelsContainer.addView(gridLayout)
+                    if (levelsInCategory.isNotEmpty()) {
+                        levels.add(LevelCategory(categoryName, levelsInCategory))
+                    }
                 }
+
+                setupRecyclerView(levels)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle possible errors.
+                // Handle errors here
             }
         })
     }
 
-    private fun isPreviousLevelCompleted(levelId: String): Boolean {
-        val levelIndex = levelId.replace("level", "").toIntOrNull() ?: return false
-        val previousLevelId = "level${levelIndex - 1}"
-        var previousLevelCompleted = false
-
-        database.child(previousLevelId).child("completed").get().addOnSuccessListener {
-            previousLevelCompleted = it.getValue(Boolean::class.java) ?: false
+    private fun setupRecyclerView(levels: List<LevelCategory>) {
+        val recyclerView: RecyclerView = levelsContainer.findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = LevelCategoryAdapter(levels) { level ->
+            Toast.makeText(context, "Selected $level", Toast.LENGTH_SHORT).show()
         }
-        return previousLevelCompleted
     }
 
-    private fun startLessonActivity(level: String) {
-        val intent = Intent(activity, LessonActivity::class.java)
-        intent.putExtra("levelId", level)
-        startActivity(intent)
-    }
+    data class LevelCategory(val category: String, val levels: List<String>)
 
     class LevelCategoryAdapter(
         private val categories: List<LevelCategory>,
@@ -175,6 +114,7 @@ class LearnFragment : Fragment() {
             }
         }
     }
+
     class LevelsAdapter(
         private val levels: List<String>,
         private val onLevelSelected: (String) -> Unit
@@ -196,8 +136,8 @@ class LearnFragment : Fragment() {
             private val levelButton: TextView = itemView.findViewById(R.id.levelButton)
 
             fun bind(level: String, onLevelSelected: (String) -> Unit) {
-                levelButton.text = level
-                levelButton.setOnClickListener {
+                levelButton.text = level.capitalize()
+                itemView.setOnClickListener {
                     onLevelSelected(level)
                 }
             }
