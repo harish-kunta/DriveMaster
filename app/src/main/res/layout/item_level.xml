@@ -27,17 +27,5 @@
         android:text="Level"
         android:textColor="@color/textColorWhite"
         android:textSize="16sp" />
-
-    <TextView
-        android:id="@+id/levelDescription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_margin="4dp"
-        android:layout_weight="0.1"
-        android:background="@android:color/transparent"
-        android:text="description"
-        android:textColor="@color/textColorWhite"
-        android:textSize="8sp" />
 </LinearLayout>
 
