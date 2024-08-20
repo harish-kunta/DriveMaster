@@ -19,7 +19,7 @@ class WelcomeActivity : AppCompatActivity() {
         btnStartTest = findViewById(R.id.btnStartTest)
         btnStartTest.setOnClickListener {
             val intent = Intent(this, LessonActivity::class.java)
-            intent.putExtra("levelId", "1")
+            intent.putExtra("levelId", "level1")
             startActivity(intent)
         }
 

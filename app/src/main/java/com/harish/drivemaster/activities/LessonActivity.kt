@@ -56,7 +56,7 @@ class LessonActivity : AppCompatActivity() {
 
         // Fetch questions from Firebase
         val questionsRef =
-            FirebaseDatabase.getInstance().getReference("lessons").child("level" + currentLevel)
+            FirebaseDatabase.getInstance().getReference("lessons").child(currentLevel)
                 .child("questions")
         questionsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {

@@ -80,7 +80,9 @@ class LearnFragment : Fragment() {
         val recyclerView: RecyclerView = levelsContainer.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = LevelCategoryAdapter(levels) { level ->
-            Toast.makeText(context, "Selected $level", Toast.LENGTH_SHORT).show()
+            val intent = Intent(context, LessonActivity::class.java)
+            intent.putExtra("levelId", level)
+            startActivity(intent)
         }
     }
 
