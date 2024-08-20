@@ -21,6 +21,7 @@ class LessonActivity : AppCompatActivity() {
 
     private lateinit var tvQuestion: TextView
     private lateinit var popupMessage: TextView
+    private lateinit var tvCorrectAnswer: TextView
     private lateinit var btnSubmit: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var btnClose: ImageView
@@ -34,6 +35,7 @@ class LessonActivity : AppCompatActivity() {
     private var selectedAnswer: String? = null
     private var selectedOptionView: View? = null
     private var isAnswered = false
+
     // Hearts management
     private var heartsLeft = 5
 
@@ -47,6 +49,7 @@ class LessonActivity : AppCompatActivity() {
         btnClose = findViewById(R.id.btnClose)
         popUpLayout = findViewById(R.id.popUpLayout)
         popupMessage = findViewById(R.id.tvPopupMessage)
+        tvCorrectAnswer = findViewById(R.id.tvCorrectAnswer)
         tvHearts = findViewById(R.id.tvHearts)
 
         auth = FirebaseAuth.getInstance()
@@ -129,6 +132,7 @@ class LessonActivity : AppCompatActivity() {
                 selectedAnswer = option
                 highlightSelectedOption(optionView)
                 btnSubmit.isEnabled = true
+                btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.correctAnswerColor))
             }
 
             optionsContainer.addView(optionView)
@@ -156,7 +160,8 @@ class LessonActivity : AppCompatActivity() {
 
     private fun updateLevelCompletion() {
         val userId = auth.currentUser?.uid ?: return
-        val userProgressRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
+        val userProgressRef =
+            FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
 
         // Mark current level as completed
         userProgressRef.child(currentLevel).child("completed").setValue(true)
@@ -167,7 +172,8 @@ class LessonActivity : AppCompatActivity() {
 
     private fun unlockNextLevel() {
         val userId = auth.currentUser?.uid ?: return
-        val userLevelsRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
+        val userLevelsRef =
+            FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
 
         val currentLevelIndex = currentLevel.replace("level", "").toIntOrNull() ?: return
         if (currentLevelIndex < 15) {
@@ -206,7 +212,8 @@ class LessonActivity : AppCompatActivity() {
     }
 
     private fun restartGame() {
-        Toast.makeText(this, "You've lost all hearts! Restarting the game.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "You've lost all hearts! Restarting the game.", Toast.LENGTH_SHORT)
+            .show()
         finish()
     }
 
@@ -218,6 +225,11 @@ class LessonActivity : AppCompatActivity() {
         popupMessage.visibility = View.GONE
         popupMessage.text = ""
         popUpLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundColor))
+        tvCorrectAnswer.visibility = View.GONE
+        tvCorrectAnswer.text = ""
+        btnSubmit.text = "CHECK"
+        btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.textColorSecondary))
+        isAnswered = false
     }
 
     private fun showAnswerPopup(isCorrect: Boolean) {
@@ -232,9 +244,11 @@ class LessonActivity : AppCompatActivity() {
                 )
             )
         } else {
-
-            popupMessage.text = "Wrong Answer!"
+            popupMessage.text = "Incorrect!"
             popupMessage.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
+            tvCorrectAnswer.visibility = View.VISIBLE
+            tvCorrectAnswer.text = "The correct answer was: $correctAnswer"
+            tvCorrectAnswer.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
             popUpLayout.setBackgroundColor(
                 ContextCompat.getColor(
                     this,
@@ -245,8 +259,24 @@ class LessonActivity : AppCompatActivity() {
     }
 
     private fun updateCheckButton(isCorrect: Boolean) {
-        btnSubmit.text = if (isCorrect) "CONTINUE" else "CONTINUE"
         isAnswered = true
+        if (isCorrect) {
+            btnSubmit.text = "CONTINUE"
+            btnSubmit.setBackgroundColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.correctAnswerColor
+                )
+            )
+        } else {
+            btnSubmit.text = "GOT IT"
+            btnSubmit.setBackgroundColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.wrongAnswerColor
+                )
+            )
+        }
     }
 
     private fun highlightSelectedOption(selectedView: View) {

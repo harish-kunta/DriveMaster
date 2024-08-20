@@ -111,6 +111,21 @@
             android:visibility="gone"
             />
 
+        <TextView
+            android:id="@+id/tvCorrectAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Answer text"
+            android:textColor="@color/correctAnswerColor"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:background="@android:color/transparent"
+            android:paddingBottom="16dp"
+            android:visibility="gone"
+            />
+
         <Button
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"

@@ -19,7 +19,6 @@ import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.LessonActivity
 
-// LearnFragment.kt
 class LearnFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
