@@ -9,7 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.harish.drivemaster.R
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var btnSignOut: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
@@ -20,10 +20,6 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        btnSignOut = findViewById(R.id.btnSignOut)
-        btnSignOut.setOnClickListener {
-            signOut()
-        }
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

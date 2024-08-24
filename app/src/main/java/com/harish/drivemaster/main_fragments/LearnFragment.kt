@@ -207,9 +207,11 @@ class LearnFragment : Fragment() {
 
         class LevelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val levelButton: TextView = itemView.findViewById(R.id.levelButton)
+            private val levelNumber: TextView = itemView.findViewById(R.id.levelNumber)
 
             fun bind(level: String, onLevelSelected: (String) -> Unit) {
                 levelButton.text = level.capitalize()
+                levelNumber.text = level.substring(5)
                 itemView.setOnClickListener {
                     onLevelSelected(level)
                 }

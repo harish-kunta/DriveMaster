@@ -131,6 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="CHECK"
+            style="@style/ButtonStyle"
             android:layout_gravity="bottom"
             android:enabled="false"/>
     </LinearLayout>
