@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,6 +17,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
+import com.harish.drivemaster.activities.EntryActivity
 import com.harish.drivemaster.activities.SettingsActivity
 
 private const val ARG_PARAM1 = "param1"
@@ -29,6 +31,7 @@ class ProfileFragment : Fragment() {
     private lateinit var settingsIcon: ImageView
     private lateinit var userNameTextView: TextView
     private lateinit var userEmailTextView: TextView
+    private lateinit var signOutButton: Button
     private val database = FirebaseDatabase.getInstance().reference
     private val auth = FirebaseAuth.getInstance()
 
@@ -50,10 +53,20 @@ class ProfileFragment : Fragment() {
         settingsIcon = v.findViewById(R.id.settingsIcon)
         userNameTextView = v.findViewById(R.id.userName)
         userEmailTextView = v.findViewById(R.id.userEmail)
+        signOutButton = v.findViewById(R.id.signOutButton)
 
         settingsIcon.setOnClickListener {
             val settingIntent = Intent(activity, SettingsActivity::class.java)
             startActivity(settingIntent)
+        }
+
+        signOutButton.setOnClickListener {
+            //sign out and redirect to sign in activity
+            auth.signOut().also {
+                val signInIntent = Intent(activity, EntryActivity::class.java)
+                startActivity(signInIntent)
+                activity?.finish()
+            }
         }
 
         populateUserInfo()

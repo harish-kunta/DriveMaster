@@ -76,5 +76,14 @@
                 android:orientation="horizontal"
                 android:rowCount="4"></GridLayout>
         </LinearLayout>
+
+        <Button
+            android:id="@+id/signOutButton"
+            style="@style/ButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Sign out" />
     </LinearLayout>
 </FrameLayout>

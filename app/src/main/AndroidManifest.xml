@@ -28,7 +28,8 @@
             android:exported="false" />
         <activity
             android:name=".activities.EntryActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.DriveMaster"/>
         <activity
             android:name=".activities.SignUpActivity"
             android:exported="false"

@@ -48,9 +48,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:gravity="center"
-            android:text="The free, fun and easy way to learn driving."
+            android:text="The free, fun and easy way to practise for driving test"
             android:textColor="@color/textColorPrimary"
-            android:textSize="32dp"
+            android:textSize="24dp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -58,15 +58,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_margin="32dp"
         android:layout_weight="0.2"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/btnGetStarted"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:layout_weight="0.5"
+            style="@style/ButtonStyle"
             android:text="Get Started" />
 
         <Button
@@ -74,6 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:layout_weight="0.5"
+            style="@style/ButtonStyle"
             android:text="I Already have an account" />
 
     </LinearLayout>

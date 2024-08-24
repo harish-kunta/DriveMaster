@@ -1,10 +1,14 @@
 package com.harish.drivemaster.activities
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.harish.drivemaster.R
@@ -29,8 +33,15 @@ class EntryActivity : AppCompatActivity() {
         }
 
         btnGetStarted.setOnClickListener {
-            val notificationIntent = Intent(this, NotificationsActivity::class.java)
-            startActivity(notificationIntent)
+            if (areNotificationsGranted()) {
+                // If notifications are already granted, proceed directly to SignInActivity
+                val signInIntent = Intent(this, SignInActivity::class.java)
+                startActivity(signInIntent)
+            } else {
+                // Otherwise, open the NotificationsActivity
+                val notificationIntent = Intent(this, NotificationsActivity::class.java)
+                startActivity(notificationIntent)
+            }
         }
 
         btnSignIn.setOnClickListener {
@@ -38,5 +49,15 @@ class EntryActivity : AppCompatActivity() {
             startActivity(signInIntent)
         }
 
+    }
+
+    private fun areNotificationsGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            NotificationManagerCompat.from(this).areNotificationsEnabled()
+        }
     }
 }

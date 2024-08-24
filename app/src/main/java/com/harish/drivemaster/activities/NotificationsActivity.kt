@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -36,7 +37,7 @@ class NotificationsActivity : AppCompatActivity() {
     }
 
     private fun showNotificationPermissionDialog() {
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
         builder.setTitle("Allow Notifications")
         builder.setMessage("Would you like to enable notifications for this app?")
 
@@ -65,14 +66,28 @@ class NotificationsActivity : AppCompatActivity() {
             val channelName = "Drive Master Notifications"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(channelId, channelName, importance)
+            channel.enableVibration(true)
+            channel.enableLights(true)
 
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+
+            // Check if the channel already exists
+            val existingChannel = notificationManager.getNotificationChannel(channelId)
+            if (existingChannel == null) {
+                notificationManager.createNotificationChannel(channel)
+                Log.d("NotificationsActivity", "Notification channel created.")
+            } else {
+                Log.d("NotificationsActivity", "Notification channel already exists.")
+            }
         }
 
-        // Additional logic to request notification permission on devices running Android 13 or above
+        // After ensuring the notification channel is created, proceed to SignIn
+        startActivity(Intent(this, SignInActivity::class.java))
+        finish()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Log.d("Notification", "Requesting POST_NOTIFICATIONS permission")
             requestPermissions(
                 arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
                 1001
@@ -88,16 +103,17 @@ class NotificationsActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1001) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                Log.d("Notification", "POST_NOTIFICATIONS permission granted")
                 Toast.makeText(this, "Notifications enabled.", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, SignInActivity::class.java))
                 finish()
             } else {
+                Log.d("Notification", "POST_NOTIFICATIONS permission denied")
                 Toast.makeText(
                     this,
                     "Notifications are disabled. You can enable them in settings.",
                     Toast.LENGTH_LONG
                 ).show()
-                // Optionally, guide the user to the app's notification settings
                 val intent = Intent()
                 intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
                 intent.putExtra("app_package", packageName)
