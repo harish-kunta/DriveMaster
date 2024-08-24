@@ -29,7 +29,7 @@ class LearnFragment : Fragment() {
     private lateinit var userDatabase: DatabaseReference
 
     // UI Components
-    private lateinit var levelsContainer: RecyclerView
+    private lateinit var pathView: PathView
 
     // Level categories
     private val levelCategories = listOf(
@@ -47,15 +47,13 @@ class LearnFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_learn, container, false)
         initializeUIComponents(view)
         initializeFirebase()
-
         loadLevels()
-
         return view
     }
 
     // Initialize UI Components
     private fun initializeUIComponents(view: View) {
-        levelsContainer = view.findViewById(R.id.recyclerView)
+        pathView = view.findViewById(R.id.pathView)
     }
 
     // Initialize Firebase
@@ -71,7 +69,7 @@ class LearnFragment : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val levels = parseLevels(snapshot)
-                    setupRecyclerView(levels)
+                    setupPathView(levels)
                 } catch (e: Exception) {
                     logAndToastError("Failed to load levels", e)
                 }
@@ -94,58 +92,43 @@ class LearnFragment : Fragment() {
         }
     }
 
-    // Setup RecyclerView
-    private fun setupRecyclerView(levels: List<LevelCategory>) {
-        levelsContainer.layoutManager = LinearLayoutManager(context)
-        levelsContainer.adapter = LevelCategoryAdapter(levels) { level ->
-            checkLevelUnlocked(level) { isUnlocked ->
-                if (isUnlocked) {
-                    navigateToLessonActivity(level)
-                } else {
-                    showLockedLevelPopup()
-                }
-            }
-        }
-    }
-
-    // Check if the level is unlocked
-    private fun checkLevelUnlocked(level: String, callback: (Boolean) -> Unit) {
-        if (level == "level1") {
-            callback(true)
-            return
-        }
-
-        auth.currentUser?.uid?.let { userId ->
-            val userLevelsRef = userDatabase.child(userId).child("levels").child(level)
-            userLevelsRef.child("unlocked").addListenerForSingleValueEvent(object : ValueEventListener {
+    // Setup PathView
+    private fun setupPathView(levels: List<LevelCategory>) {
+        // Get user's progress to determine completed levels
+        val currentUser = auth.currentUser
+        userDatabase.child(currentUser?.uid ?: "")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
-                    callback(isUnlocked)
+                    val completedLevels = snapshot.child("completedLevels").children.mapNotNull {
+                        it.key?.toIntOrNull()
+                    }
+
+                    val currentLevel = snapshot.child("currentLevel").getValue(Int::class.java) ?: 1
+
+                    // Prepare marker data for PathView
+                    val markers = mutableListOf<Marker>()
+
+                    // Iterate through each level category
+                    levels.forEach { levelCategory ->
+                        levelCategory.levels.forEachIndexed { index, levelId ->
+                            val levelNumber = index + 1
+                            val status = when {
+                                completedLevels.contains(levelNumber) -> LevelStatus.COMPLETED
+                                levelNumber == currentLevel -> LevelStatus.CURRENT
+                                else -> LevelStatus.LOCKED
+                            }
+                            markers.add(Marker(levelNumber, status))
+                        }
+                    }
+
+                    // Update PathView with markers
+                    pathView.setMarkers(markers)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    logAndToastError("Failed to check level status", error.toException())
-                    callback(false)
+                    logAndToastError("Failed to load user progress", error.toException())
                 }
             })
-        } ?: callback(false)
-    }
-
-    // Navigate to LessonActivity
-    private fun navigateToLessonActivity(level: String) {
-        val intent = Intent(context, LessonActivity::class.java).apply {
-            putExtra("levelId", level)
-        }
-        startActivity(intent)
-    }
-
-    // Show popup for locked level
-    private fun showLockedLevelPopup() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Level Locked")
-            .setMessage("You need to complete the previous level to unlock this one.")
-            .setPositiveButton("OK", null)
-            .show()
     }
 
     // Log error and show a toast message
@@ -177,12 +160,49 @@ class LearnFragment : Fragment() {
 
         class LevelCategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val categoryTitle: TextView = itemView.findViewById(R.id.categoryTitle)
-            private val levelsRecyclerView: RecyclerView = itemView.findViewById(R.id.levelsRecyclerView)
+            private val pathView: PathView = itemView.findViewById(R.id.pathView)
 
             fun bind(category: LevelCategory, onLevelSelected: (String) -> Unit) {
                 categoryTitle.text = category.category
-                levelsRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
-                levelsRecyclerView.adapter = LevelsAdapter(category.levels, onLevelSelected)
+
+                // Prepare markers for PathView based on the status of each level
+                // Fetch completed levels and current level from Firebase
+                (itemView.context as? LearnFragment)?.let { fragment ->
+                    fragment.getCompletedLevels { completedLevels ->
+                        fragment.getCurrentLevel { currentLevel ->
+                            val markers = category.levels.mapIndexed { index, levelId ->
+                                val levelNumber = index + 1
+                                val status = when {
+                                    completedLevels.contains(levelNumber) -> LevelStatus.COMPLETED
+                                    levelNumber == currentLevel -> LevelStatus.CURRENT
+                                    else -> LevelStatus.LOCKED
+                                }
+                                Marker(levelNumber, status)
+                            }
+
+                            // Set the markers to the PathView
+                            pathView.setMarkers(markers)
+
+                            // Handle level selection
+                            pathView.setOnMarkerClickListener { marker ->
+                                if (marker.status == LevelStatus.CURRENT || marker.status == LevelStatus.COMPLETED) {
+                                    onLevelSelected("level${marker.levelNumber}")
+                                } else {
+                                    showLockedLevelPopup()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Show popup for locked level
+            private fun showLockedLevelPopup() {
+                AlertDialog.Builder(itemView.context)
+                    .setTitle("Level Locked")
+                    .setMessage("You need to complete the previous level to unlock this one.")
+                    .setPositiveButton("OK", null)
+                    .show()
             }
         }
     }
@@ -216,5 +236,49 @@ class LearnFragment : Fragment() {
             }
         }
     }
+
+    // Extension function to get completed levels
+    private fun getCompletedLevels(callback: (List<Int>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return callback(emptyList())
+        val userLevelsRef = userDatabase.child(userId).child("levels")
+
+        userLevelsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val completedLevels = mutableListOf<Int>()
+                snapshot.children.forEach { levelSnapshot ->
+                    val levelNumber = levelSnapshot.key?.removePrefix("level")?.toIntOrNull()
+                    val isCompleted = levelSnapshot.child("completed").getValue(Boolean::class.java) ?: false
+                    if (isCompleted && levelNumber != null) {
+                        completedLevels.add(levelNumber)
+                    }
+                }
+                callback(completedLevels)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                logAndToastError("Failed to retrieve completed levels", error.toException())
+                callback(emptyList())
+            }
+        })
+    }
+
+    // Extension function to get current level
+    private fun getCurrentLevel(callback: (Int) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return callback(1)
+        val userLevelsRef = userDatabase.child(userId).child("currentLevel")
+
+        userLevelsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val currentLevel = snapshot.getValue(Int::class.java) ?: 1
+                callback(currentLevel)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                logAndToastError("Failed to retrieve current level", error.toException())
+                callback(1)
+            }
+        })
+    }
 }
+
 
