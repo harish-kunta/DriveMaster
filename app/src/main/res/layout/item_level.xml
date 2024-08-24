@@ -20,12 +20,13 @@
         android:id="@+id/levelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_margin="4dp"
-        android:layout_weight="0.1"
-        android:background="@android:color/transparent"
-        android:text="Level"
-        android:textColor="@color/textColorWhite"
-        android:textSize="16sp" />
+        android:background="@drawable/level_background"
+        android:padding="16dp"
+        android:textColor="@color/textColorPrimary"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:clickable="true"/>
+
 </LinearLayout>
 
