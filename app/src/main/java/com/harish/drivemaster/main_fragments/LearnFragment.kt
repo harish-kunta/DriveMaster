@@ -63,9 +63,7 @@ class LearnFragment : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val levels = parseLevels(snapshot)
-                    loadUserCompletedLevels { completedLevels ->
-                        setupRecyclerView(levels, completedLevels)
-                    }
+                    listenForUserLevelUpdates(levels)
                 } catch (e: Exception) {
                     logAndToastError("Failed to load levels", e)
                 }
@@ -77,21 +75,20 @@ class LearnFragment : Fragment() {
         })
     }
 
-    private fun loadUserCompletedLevels(callback: (Set<Int>) -> Unit) {
+    private fun listenForUserLevelUpdates(levels: List<LevelCategory>) {
         auth.currentUser?.uid?.let { userId ->
             userDatabase.child(userId).child("completed_levels")
-                .addListenerForSingleValueEvent(object : ValueEventListener {
+                .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }.toSet()
-                        callback(completedLevels)
+                        setupRecyclerView(levels, completedLevels)
                     }
 
                     override fun onCancelled(error: DatabaseError) {
                         logAndToastError("Failed to load user levels", error.toException())
-                        callback(emptySet())
                     }
                 })
-        } ?: callback(emptySet())
+        }
     }
 
     private fun parseLevels(snapshot: DataSnapshot): List<LevelCategory> {
@@ -220,3 +217,4 @@ class LearnFragment : Fragment() {
         }
     }
 }
+
