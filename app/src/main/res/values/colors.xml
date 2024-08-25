@@ -45,4 +45,6 @@
     <color name="colorGray">#B0BEC5</color>
     <color name="colorGrayDark">#90A4AE</color>
     <color name="colorGrayLight">#CFD8DC</color>
+    <color name="completedLevelColor">#58CC02</color>
+    <color name="lockedLevelColor">#4B4B4B</color>
 </resources>
