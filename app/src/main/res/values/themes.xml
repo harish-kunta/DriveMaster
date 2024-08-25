@@ -59,4 +59,20 @@
         <item name="android:textColor">#EA5850</item>
     </style>
 
+    <style name="LessonPageCorrectTextStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="LessonPageCorrectAnswerTextStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
 </resources>

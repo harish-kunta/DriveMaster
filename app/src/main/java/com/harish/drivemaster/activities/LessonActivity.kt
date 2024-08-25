@@ -23,6 +23,7 @@ class LessonActivity : AppCompatActivity() {
     // UI Components
     private lateinit var tvQuestion: TextView
     private lateinit var popupMessage: TextView
+    private lateinit var popupResultView: LinearLayout
     private lateinit var tvCorrectAnswer: TextView
     private lateinit var btnSubmit: Button
     private lateinit var progressBar: ProgressBar
@@ -64,6 +65,7 @@ class LessonActivity : AppCompatActivity() {
         btnClose = findViewById(R.id.btnClose)
         popUpLayout = findViewById(R.id.popUpLayout)
         popupMessage = findViewById(R.id.tvPopupMessage)
+        popupResultView = findViewById(R.id.popUpResultView)
         tvCorrectAnswer = findViewById(R.id.tvCorrectAnswer)
         tvHearts = findViewById(R.id.tvHearts)
         btnSubmit.isEnabled = false
@@ -208,7 +210,7 @@ class LessonActivity : AppCompatActivity() {
 
     // Show the popup indicating whether the answer was correct or incorrect
     private fun showAnswerPopup(isCorrect: Boolean) {
-        popupMessage.visibility = View.VISIBLE
+        popupResultView.visibility = View.VISIBLE
         popupMessage.text = if (isCorrect) "Correct Answer!" else "Incorrect!"
         popupMessage.setTextColor(
             ContextCompat.getColor(
@@ -290,13 +292,14 @@ class LessonActivity : AppCompatActivity() {
     private fun updateLevelCompletion() {
         val userId = auth.currentUser?.uid ?: return
         val userLevelsRef =
-            FirebaseDatabase.getInstance().getReference("users").child(userId).child("completed_levels")
+            FirebaseDatabase.getInstance().getReference("users").child(userId)
+                .child("completed_levels")
         userLevelsRef.child(currentLevelId).setValue(true)
     }
 
     // Clean the popup and reset it to the default state
     private fun cleanPopUp() {
-        popupMessage.visibility = View.GONE
+        popupResultView.visibility = View.GONE
         popupMessage.text = ""
         popUpLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.backgroundColor))
         tvCorrectAnswer.visibility = View.GONE
