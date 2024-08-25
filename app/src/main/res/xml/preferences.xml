@@ -3,41 +3,46 @@
     <!-- Header as a preference -->
     <Preference
         android:key="header"
-        android:title="Settings"
         android:layout="@layout/custom_header_layout"
-        android:selectable="false" />
+        android:selectable="false"
+        android:title="Settings" />
 
     <PreferenceCategory
         android:key="preference_category"
-        android:title="Account"
-        android:layout="@layout/settings_category_title_layout">
+        android:layout="@layout/settings_category_title_layout"
+        android:title="Account">
 
         <PreferenceScreen
             android:key="preference_screen"
-            android:title="Preferences"
             android:layout="@layout/custom_preference_screen_background"
-            >
-        </PreferenceScreen>
+            android:title="Preferences"></PreferenceScreen>
 
         <PreferenceScreen
             android:key="profile_screen"
-            android:title="Profile"
             android:layout="@layout/custom_preference_screen_background"
-            >
-        </PreferenceScreen>
+            android:title="Profile"></PreferenceScreen>
 
         <PreferenceScreen
             android:key="notifications_screen"
-            android:title="Notifications"
             android:layout="@layout/custom_preference_screen_background"
-            >
-        </PreferenceScreen>
+            android:title="Notifications"></PreferenceScreen>
 
     </PreferenceCategory>
 
     <com.harish.drivemaster.settings_fragments.ButtonPreference
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:key="sign_out_button"
-        android:title="Sign Out"
-        />
+        android:title="Sign Out" />
+
+
+    <Preference
+        android:key="terms_of_service"
+        android:layout="@layout/preference_text_layout"
+        android:title="Terms of Service" />
+    <Preference
+        android:key="privacy_policy"
+        android:layout="@layout/preference_text_layout"
+        android:title="Privacy Policy" />
 
 </PreferenceScreen>

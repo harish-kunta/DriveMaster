@@ -129,4 +129,13 @@
         <item name="android:gravity">left</item>
     </style>
 
+    <style name="PreferenceTextStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textColorTitle</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:gravity">left</item>
+    </style>
+
 </resources>
