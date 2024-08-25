@@ -35,4 +35,9 @@
 
     </PreferenceCategory>
 
+    <com.harish.drivemaster.settings_fragments.ButtonPreference
+        android:key="sign_out_button"
+        android:title="Sign Out"
+        />
+
 </PreferenceScreen>

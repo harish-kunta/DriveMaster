@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -23,7 +22,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.harish.drivemaster.R
-import com.harish.drivemaster.activities.EntryActivity
 import com.harish.drivemaster.activities.SettingsActivity
 import de.hdodenhof.circleimageview.CircleImageView
 
@@ -37,7 +35,6 @@ class ProfileFragment : Fragment() {
     private lateinit var settingsIcon: ImageView
     private lateinit var userNameTextView: TextView
     private lateinit var userEmailTextView: TextView
-    private lateinit var signOutButton: Button
     private lateinit var profileImageView: CircleImageView
     private lateinit var editProfileImageButton: ImageButton
     private lateinit var profilePictureSection: FrameLayout
@@ -63,7 +60,6 @@ class ProfileFragment : Fragment() {
         settingsIcon = v.findViewById(R.id.settingsIcon)
         userNameTextView = v.findViewById(R.id.userName)
         userEmailTextView = v.findViewById(R.id.userEmail)
-        signOutButton = v.findViewById(R.id.signOutButton)
         profilePictureSection = v.findViewById(R.id.profilePictureSection)
         profileImageView = v.findViewById(R.id.profileImageView)
         editProfileImageButton = v.findViewById(R.id.editProfileImageButton)
@@ -71,15 +67,6 @@ class ProfileFragment : Fragment() {
         settingsIcon.setOnClickListener {
             val settingIntent = Intent(activity, SettingsActivity::class.java)
             startActivity(settingIntent)
-        }
-
-        signOutButton.setOnClickListener {
-            //sign out and redirect to sign in activity
-            auth.signOut().also {
-                val signInIntent = Intent(activity, EntryActivity::class.java)
-                startActivity(signInIntent)
-                activity?.finish()
-            }
         }
 
         profilePictureSection.setOnClickListener {
