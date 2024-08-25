@@ -3,79 +3,122 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:layout_margin="8dp"
     android:layout_marginTop="32dp"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="8dp">
+        android:layout_gravity="center"
+        android:layout_weight="0.3"
+        android:gravity="center"
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/username_field_input_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter email"
-        android:textColorHint="@color/textColorPrimary"
-        app:errorEnabled="true">
+        android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/email_field"
+        <TextView
+            style="@style/EntryPageTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:gravity="center"
+            android:text="Drive Master" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/password_field_input_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter password"
-        android:textColorHint="@color/textColorPrimary"
-        app:endIconMode="password_toggle"
-        app:endIconTint="@color/colorPrimary"
-        app:errorEnabled="true">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/password_field"
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:layout_weight="0.7"
+            android:src="@drawable/drive_master_logo" />
     </LinearLayout>
-    <Button
-        android:id="@+id/btnSignIn"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        style="@style/ButtonStyle"
-        android:text="Sign In" />
+        android:layout_weight="0.2"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnSignUp"
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/username_field_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"
+            android:textColorHint="@color/textColorPrimary"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/email_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/password_field_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:textColorHint="@color/textColorPrimary"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/colorPrimary"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/password_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/tvForgotPassword"
+            style="@style/SignInPageSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="Forgot Password?" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_marginTop="8dp"
-        style="@style/ButtonStyle"
-        android:text="Sign Up" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvForgotPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Forgot Password?"
-        android:textColor="@android:color/holo_blue_dark" />
+        <Button
+            android:id="@+id/btnSignIn"
+            style="@style/GreenButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Login" />
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/btnGoogleSignIn"
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/btnGoogleSignIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"/>
+
+        <TextView
+            android:id="@+id/btnSignUp"
+            style="@style/SignInPageSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Create Account" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp" />
+        android:layout_gravity="center"
+        android:layout_weight="0.3"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp" />
+
+
 </LinearLayout>

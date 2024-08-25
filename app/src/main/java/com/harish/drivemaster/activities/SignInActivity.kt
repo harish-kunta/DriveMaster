@@ -19,7 +19,7 @@ import com.harish.drivemaster.R
 class SignInActivity : AppCompatActivity() {
 
     private lateinit var btnSignIn: Button
-    private lateinit var btnSignUp: Button
+    private lateinit var btnSignUp: TextView
     private lateinit var tvForgotPassword: TextView
     private lateinit var userEmailAddress: TextInputEditText
     private lateinit var userPassword: TextInputEditText

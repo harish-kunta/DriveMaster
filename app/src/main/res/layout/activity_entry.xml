@@ -6,13 +6,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:weightSum="1"
     tools:context=".activities.EntryActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="0.1"
+        android:layout_weight="0.3"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="0.5"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="16dp">
@@ -22,19 +33,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Drive Master"
-            android:textColor="@color/colorPrimary"
-            android:textSize="32dp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="0.7"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+            style="@style/EntryPageTitle" />
 
         <ImageView
             android:layout_width="match_parent"
@@ -49,16 +48,15 @@
             android:layout_weight="0.3"
             android:gravity="center"
             android:text="The free, fun and easy way to practise for driving test"
-            android:textColor="@color/textColorPrimary"
-            android:textSize="24dp"
-            android:textStyle="bold" />
+            style="@style/EntryPageSubtitle"
+            />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="32dp"
+        android:layout_margin="16dp"
         android:layout_weight="0.2"
         android:orientation="vertical">
 
@@ -68,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="0.5"
-            style="@style/ButtonStyle"
+            style="@style/GreenButton"
             android:text="Get Started" />
 
         <Button
@@ -77,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="0.5"
-            style="@style/ButtonStyle"
+            style="@style/GreenButton"
             android:text="I Already have an account" />
 
     </LinearLayout>

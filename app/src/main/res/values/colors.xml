@@ -10,13 +10,18 @@
     <color name="backgroundColorLight">#F0F0F0</color> <!-- Light Gray background -->
 
     <!-- Text colors -->
+    <color name="textColorTitle">#58CC02</color>
     <color name="textColorPrimary">#212121</color> <!-- Dark Gray for primary text -->
-    <color name="textColorSecondary">#4B4B4B</color>
+    <color name="textColorSecondary">#777777</color>
     <color name="textColorWhite">#FFFFFF</color> <!-- Light Gray for secondary text -->
 
     <!-- Button colors -->
-    <color name="buttonColor">#58CC02</color> <!-- Green Button -->
-    <color name="buttonTextColor">#FFFFFF</color> <!-- White text on buttons -->
+    <color name="greenButtonColor">#58CC02</color> <!-- Green Button -->
+    <color name="greenButtonTextColor">#FFFFFF</color> <!-- White text on buttons -->
+
+    <color name="whiteButtonColor">#FFFFFF</color> <!-- Green Button -->
+    <color name="whiteButtonTextColor">#58CC02</color> <!-- White text on buttons -->
+
 
     <!-- Border and shadow colors -->
     <color name="borderColor">#E0E0E0</color> <!-- Light Gray border -->
