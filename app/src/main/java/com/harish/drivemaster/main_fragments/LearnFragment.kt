@@ -1,6 +1,5 @@
 package com.harish.drivemaster.main_fragments
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -60,11 +59,13 @@ class LearnFragment : Fragment() {
     }
 
     private fun loadLevels() {
-        lessonsDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
+        lessonsDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val levels = parseLevels(snapshot)
-                    setupRecyclerView(levels)
+                    loadUserCompletedLevels { completedLevels ->
+                        setupRecyclerView(levels, completedLevels)
+                    }
                 } catch (e: Exception) {
                     logAndToastError("Failed to load levels", e)
                 }
@@ -76,6 +77,23 @@ class LearnFragment : Fragment() {
         })
     }
 
+    private fun loadUserCompletedLevels(callback: (Set<Int>) -> Unit) {
+        auth.currentUser?.uid?.let { userId ->
+            userDatabase.child(userId).child("completed_levels")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }.toSet()
+                        callback(completedLevels)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        logAndToastError("Failed to load user levels", error.toException())
+                        callback(emptySet())
+                    }
+                })
+        } ?: callback(emptySet())
+    }
+
     private fun parseLevels(snapshot: DataSnapshot): List<LevelCategory> {
         return levelCategories.mapNotNull { (categoryName, levelRange) ->
             val levelsInCategory = levelRange.mapNotNull { levelId ->
@@ -85,37 +103,16 @@ class LearnFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerView(levels: List<LevelCategory>) {
+    private fun setupRecyclerView(levels: List<LevelCategory>, completedLevels: Set<Int>) {
+        val maxCompletedLevel = completedLevels.maxOrNull() ?: 0
         levelsContainer.layoutManager = LinearLayoutManager(context)
-        levelsContainer.adapter = LevelCategoryAdapter(levels) { levelId ->
-            checkLevelUnlocked(levelId) { isUnlocked, isNextLevel ->
-                if (isUnlocked || isNextLevel) {
-                    navigateToLessonActivity(levelId)
-                } else {
-                    showLockedLevelPopup()
-                }
+        levelsContainer.adapter = LevelCategoryAdapter(levels, completedLevels, maxCompletedLevel) { levelId ->
+            if (levelId <= maxCompletedLevel + 1) {
+                navigateToLessonActivity(levelId)
+            } else {
+                showLockedLevelPopup()
             }
         }
-    }
-
-    private fun checkLevelUnlocked(levelId: Int, callback: (Boolean, Boolean) -> Unit) {
-        auth.currentUser?.uid?.let { userId ->
-            val userLevelsRef = userDatabase.child(userId).child("completed_levels")
-            userLevelsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }
-                    val isUnlocked = levelId in completedLevels
-                    val isNextLevel = levelId == (completedLevels.maxOrNull()?.plus(1) ?: 1)
-
-                    callback(isUnlocked, isNextLevel)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    logAndToastError("Failed to check level status", error.toException())
-                    callback(false, false)
-                }
-            })
-        } ?: callback(false, false)
     }
 
     private fun navigateToLessonActivity(levelId: Int) {
@@ -142,6 +139,8 @@ class LearnFragment : Fragment() {
 
     class LevelCategoryAdapter(
         private val categories: List<LevelCategory>,
+        private val completedLevels: Set<Int>,
+        private val maxCompletedLevel: Int,
         private val onLevelSelected: (Int) -> Unit
     ) : RecyclerView.Adapter<LevelCategoryAdapter.LevelCategoryViewHolder>() {
 
@@ -152,7 +151,7 @@ class LearnFragment : Fragment() {
 
         override fun onBindViewHolder(holder: LevelCategoryViewHolder, position: Int) {
             val category = categories[position]
-            holder.bind(category, onLevelSelected)
+            holder.bind(category, completedLevels, maxCompletedLevel, onLevelSelected)
         }
 
         override fun getItemCount(): Int = categories.size
@@ -161,16 +160,23 @@ class LearnFragment : Fragment() {
             private val categoryTitle: TextView = itemView.findViewById(R.id.categoryTitle)
             private val levelsRecyclerView: RecyclerView = itemView.findViewById(R.id.levelsRecyclerView)
 
-            fun bind(category: LevelCategory, onLevelSelected: (Int) -> Unit) {
+            fun bind(
+                category: LevelCategory,
+                completedLevels: Set<Int>,
+                maxCompletedLevel: Int,
+                onLevelSelected: (Int) -> Unit
+            ) {
                 categoryTitle.text = category.category
                 levelsRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
-                levelsRecyclerView.adapter = LevelsAdapter(category.levels, onLevelSelected)
+                levelsRecyclerView.adapter = LevelsAdapter(category.levels, completedLevels, maxCompletedLevel, onLevelSelected)
             }
         }
     }
 
     class LevelsAdapter(
         private val levels: List<Int>,
+        private val completedLevels: Set<Int>,
+        private val maxCompletedLevel: Int,
         private val onLevelSelected: (Int) -> Unit
     ) : RecyclerView.Adapter<LevelsAdapter.LevelViewHolder>() {
 
@@ -181,7 +187,7 @@ class LearnFragment : Fragment() {
 
         override fun onBindViewHolder(holder: LevelViewHolder, position: Int) {
             val levelId = levels[position]
-            holder.bind(levelId, onLevelSelected)
+            holder.bind(levelId, completedLevels, maxCompletedLevel, onLevelSelected)
         }
 
         override fun getItemCount(): Int = levels.size
@@ -190,40 +196,27 @@ class LearnFragment : Fragment() {
             private val levelButton: TextView = itemView.findViewById(R.id.levelButton)
             private val levelNumber: TextView = itemView.findViewById(R.id.levelNumber)
 
-            fun bind(levelId: Int, onLevelSelected: (Int) -> Unit) {
+            fun bind(
+                levelId: Int,
+                completedLevels: Set<Int>,
+                maxCompletedLevel: Int,
+                onLevelSelected: (Int) -> Unit
+            ) {
                 levelButton.text = "Level $levelId"
                 levelNumber.text = levelId.toString()
-                itemView.setOnClickListener {
-                    onLevelSelected(levelId)
+
+                val context = itemView.context
+
+                when {
+                    levelId in completedLevels -> itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.completedLevelColor))
+                    levelId == maxCompletedLevel + 1 -> itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.nextLevelColor))
+                    else -> itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.lockedLevelColor))
                 }
 
-                val userId = FirebaseAuth.getInstance().currentUser?.uid
-                val userDatabase = FirebaseDatabase.getInstance().reference.child("users")
-                userId?.let {
-                    val userLevelRef = userDatabase.child(it).child("completed_levels")
-                    userLevelRef.addValueEventListener(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }
-                            val isCompleted = levelId in completedLevels
-                            val isNextLevel = levelId == (completedLevels.maxOrNull()?.plus(1) ?: 1)
-
-                            when {
-                                isCompleted -> itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.completedLevelColor))
-                                isNextLevel -> itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.completedLevelColor))
-                                else -> itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.lockedLevelColor))
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            Log.e("LevelViewHolder", "Failed to check level completion", error.toException())
-                        }
-                    })
+                itemView.setOnClickListener {
+                    onLevelSelected(levelId)
                 }
             }
         }
     }
 }
-
-
-
-
