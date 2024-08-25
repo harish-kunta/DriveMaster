@@ -74,6 +74,7 @@ class LessonActivity : AppCompatActivity() {
             showErrorAndExit("Invalid level ID")
             return
         }
+        currentLevel = "level$currentLevel"
     }
 
     // Set up event listeners for UI components

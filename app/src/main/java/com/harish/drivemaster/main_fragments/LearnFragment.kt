@@ -88,8 +88,8 @@ class LearnFragment : Fragment() {
     private fun setupRecyclerView(levels: List<LevelCategory>) {
         levelsContainer.layoutManager = LinearLayoutManager(context)
         levelsContainer.adapter = LevelCategoryAdapter(levels) { levelId ->
-            checkLevelUnlocked(levelId) { isUnlocked ->
-                if (isUnlocked) {
+            checkLevelUnlocked(levelId) { isUnlocked, isNextLevel ->
+                if (isUnlocked || isNextLevel) {
                     navigateToLessonActivity(levelId)
                 } else {
                     showLockedLevelPopup()
@@ -98,31 +98,29 @@ class LearnFragment : Fragment() {
         }
     }
 
-    private fun checkLevelUnlocked(levelId: Int, callback: (Boolean) -> Unit) {
-        if (levelId == 1) {
-            callback(true)
-            return
-        }
-
+    private fun checkLevelUnlocked(levelId: Int, callback: (Boolean, Boolean) -> Unit) {
         auth.currentUser?.uid?.let { userId ->
-            val userLevelsRef = userDatabase.child(userId).child("completed_levels").child(levelId.toString())
+            val userLevelsRef = userDatabase.child(userId).child("completed_levels")
             userLevelsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
-                    callback(isUnlocked)
+                    val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }
+                    val isUnlocked = levelId in completedLevels
+                    val isNextLevel = levelId == (completedLevels.maxOrNull()?.plus(1) ?: 1)
+
+                    callback(isUnlocked, isNextLevel)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     logAndToastError("Failed to check level status", error.toException())
-                    callback(false)
+                    callback(false, false)
                 }
             })
-        } ?: callback(false)
+        } ?: callback(false, false)
     }
 
     private fun navigateToLessonActivity(levelId: Int) {
         val intent = Intent(context, LessonActivity::class.java).apply {
-            putExtra("levelId", levelId)
+            putExtra("levelId", levelId.toString())
         }
         startActivity(intent)
     }
@@ -225,6 +223,7 @@ class LearnFragment : Fragment() {
         }
     }
 }
+
 
 
 
