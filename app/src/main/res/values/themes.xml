@@ -37,7 +37,7 @@
     <style name="SignInPageSubtitle" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/nunito_bold</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">#777777</item>
+        <item name="android:textColor">@color/textColorSecondary</item>
     </style>
 
     <style name="LessonPageTitleStyle" parent="TextAppearance.AppCompat">
@@ -73,6 +73,33 @@
         <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="ProfilePageTitleStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textColorSecondary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="ProfilePageUserNameStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="ProfilePageSubtitleStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_semibold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/textColorSecondary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:gravity">left</item>
     </style>
 
 </resources>
