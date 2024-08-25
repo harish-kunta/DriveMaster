@@ -1,5 +1,6 @@
 package com.harish.drivemaster.main_fragments
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -48,7 +50,9 @@ class LearnFragment : Fragment() {
         initializeUIComponents(view)
         initializeFirebase()
 
-        loadLevels()
+        fetchCompletedLevels { completedLevels ->
+            loadLevels(completedLevels)
+        }
 
         return view
     }
@@ -65,13 +69,38 @@ class LearnFragment : Fragment() {
         userDatabase = FirebaseDatabase.getInstance().reference.child("users")
     }
 
+    // Fetch completed levels from Firebase
+    private fun fetchCompletedLevels(callback: (Set<Int>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+
+        userDatabase.child(userId).child("completed_levels")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val completedLevels = mutableSetOf<Int>()
+                    for (levelSnapshot in snapshot.children) {
+                        val levelNumber = levelSnapshot.key?.toIntOrNull() ?: continue
+                        val isCompleted = levelSnapshot.getValue(Boolean::class.java) ?: false
+                        if (isCompleted) {
+                            completedLevels.add(levelNumber)
+                        }
+                    }
+                    callback(completedLevels)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    logAndToastError("Failed to fetch completed levels", error.toException())
+                    callback(emptySet())
+                }
+            })
+    }
+
     // Load levels from Firebase
-    private fun loadLevels() {
+    private fun loadLevels(completedLevels: Set<Int>) {
         lessonsDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val levels = parseLevels(snapshot)
-                    setupRecyclerView(levels)
+                    setupRecyclerView(levels, completedLevels)
                 } catch (e: Exception) {
                     logAndToastError("Failed to load levels", e)
                 }
@@ -90,15 +119,19 @@ class LearnFragment : Fragment() {
                 val levelId = "level$levelIndex"
                 if (snapshot.hasChild(levelId)) levelId else null
             }
-            if (levelsInCategory.isNotEmpty()) LevelCategory(categoryName, levelsInCategory) else null
+            if (levelsInCategory.isNotEmpty()) LevelCategory(
+                categoryName,
+                levelsInCategory
+            ) else null
         }
     }
 
     // Setup RecyclerView
-    private fun setupRecyclerView(levels: List<LevelCategory>) {
+    private fun setupRecyclerView(levels: List<LevelCategory>, completedLevels: Set<Int>) {
         levelsContainer.layoutManager = LinearLayoutManager(context)
-        levelsContainer.adapter = LevelCategoryAdapter(levels) { level ->
-            checkLevelUnlocked(level) { isUnlocked ->
+        levelsContainer.adapter = LevelCategoryAdapter(levels, completedLevels) { level ->
+            var level_id = level.substring(5)
+            checkLevelUnlocked(level_id) { isUnlocked ->
                 if (isUnlocked) {
                     navigateToLessonActivity(level)
                 } else {
@@ -110,24 +143,25 @@ class LearnFragment : Fragment() {
 
     // Check if the level is unlocked
     private fun checkLevelUnlocked(level: String, callback: (Boolean) -> Unit) {
-        if (level == "level1") {
+        if (level == "1") {
             callback(true)
             return
         }
 
         auth.currentUser?.uid?.let { userId ->
-            val userLevelsRef = userDatabase.child(userId).child("levels").child(level)
-            userLevelsRef.child("unlocked").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
-                    callback(isUnlocked)
-                }
+            val userLevelsRef = userDatabase.child(userId).child("completedLevels").child(level)
+            userLevelsRef
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val isUnlocked = snapshot.getValue(Boolean::class.java) ?: false
+                        callback(isUnlocked)
+                    }
 
-                override fun onCancelled(error: DatabaseError) {
-                    logAndToastError("Failed to check level status", error.toException())
-                    callback(false)
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        logAndToastError("Failed to check level status", error.toException())
+                        callback(false)
+                    }
+                })
         } ?: callback(false)
     }
 
@@ -160,29 +194,38 @@ class LearnFragment : Fragment() {
     // Adapter for LevelCategory
     class LevelCategoryAdapter(
         private val categories: List<LevelCategory>,
+        private val completedLevels: Set<Int>,
         private val onLevelSelected: (String) -> Unit
     ) : RecyclerView.Adapter<LevelCategoryAdapter.LevelCategoryViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LevelCategoryViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
             return LevelCategoryViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: LevelCategoryViewHolder, position: Int) {
             val category = categories[position]
-            holder.bind(category, onLevelSelected)
+            holder.bind(category, completedLevels, onLevelSelected)
         }
 
         override fun getItemCount(): Int = categories.size
 
         class LevelCategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val categoryTitle: TextView = itemView.findViewById(R.id.categoryTitle)
-            private val levelsRecyclerView: RecyclerView = itemView.findViewById(R.id.levelsRecyclerView)
+            private val levelsRecyclerView: RecyclerView =
+                itemView.findViewById(R.id.levelsRecyclerView)
 
-            fun bind(category: LevelCategory, onLevelSelected: (String) -> Unit) {
+            fun bind(
+                category: LevelCategory,
+                completedLevels: Set<Int>,
+                onLevelSelected: (String) -> Unit
+            ) {
                 categoryTitle.text = category.category
-                levelsRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
-                levelsRecyclerView.adapter = LevelsAdapter(category.levels, onLevelSelected)
+                levelsRecyclerView.layoutManager =
+                    LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+                levelsRecyclerView.adapter =
+                    LevelsAdapter(category.levels, completedLevels, onLevelSelected)
             }
         }
     }
@@ -190,30 +233,49 @@ class LearnFragment : Fragment() {
     // Adapter for Levels
     class LevelsAdapter(
         private val levels: List<String>,
+        private val completedLevels: Set<Int>,
         private val onLevelSelected: (String) -> Unit
     ) : RecyclerView.Adapter<LevelsAdapter.LevelViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LevelViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_level, parent, false)
-            return LevelViewHolder(view)
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.item_level, parent, false)
+            return LevelViewHolder(view, parent.context)
         }
 
         override fun onBindViewHolder(holder: LevelViewHolder, position: Int) {
             val level = levels[position]
-            holder.bind(level, onLevelSelected)
+            val levelNumber = level.substring(5).toIntOrNull()
+
+            holder.bind(level, levelNumber, completedLevels, onLevelSelected)
         }
 
         override fun getItemCount(): Int = levels.size
 
-        class LevelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        class LevelViewHolder(itemView: View, context: Context) : RecyclerView.ViewHolder(itemView) {
             private val levelButton: TextView = itemView.findViewById(R.id.levelButton)
-            private val levelNumber: TextView = itemView.findViewById(R.id.levelNumber)
+            private val levelNumber1: TextView = itemView.findViewById(R.id.levelNumber)
+            private val itemLevel: View = itemView.findViewById(R.id.itemLevel)
+            private val context: Context = context
 
-            fun bind(level: String, onLevelSelected: (String) -> Unit) {
+            fun bind(level: String, levelNumber: Int?, completedLevels: Set<Int>, onLevelSelected: (String) -> Unit) {
                 levelButton.text = level.capitalize()
-                levelNumber.text = level.substring(5)
-                itemView.setOnClickListener {
-                    onLevelSelected(level)
+                levelNumber?.let { num ->
+                    levelNumber1.text = num.toString()
+
+                    // Determine the background color
+                    when {
+                        completedLevels.contains(num) || completedLevels.contains(num - 1) -> {
+                            itemLevel.setBackgroundColor(ContextCompat.getColor(
+                                context, R.color.colorPrimary
+                            ))
+                        }
+                        else -> itemLevel.setBackgroundColor(ContextCompat.getColor(context, R.color.textColorSecondary))
+                    }
+
+                    itemView.setOnClickListener {
+                        onLevelSelected(level)
+                    }
                 }
             }
         }
