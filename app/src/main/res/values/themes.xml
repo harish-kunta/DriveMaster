@@ -102,4 +102,31 @@
         <item name="android:gravity">left</item>
     </style>
 
+    <style name="SettingsPageTitle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="PreferenceCategoryTitle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textColorSecondary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="PreferenceTitle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:gravity">left</item>
+    </style>
+
 </resources>

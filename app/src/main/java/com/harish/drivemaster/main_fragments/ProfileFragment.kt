@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -35,7 +34,6 @@ class ProfileFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-    private lateinit var gridLayout: GridLayout
     private lateinit var settingsIcon: ImageView
     private lateinit var userNameTextView: TextView
     private lateinit var userEmailTextView: TextView
@@ -62,7 +60,6 @@ class ProfileFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_profile, container, false)
-        gridLayout = v.findViewById(R.id.gridLayout)
         settingsIcon = v.findViewById(R.id.settingsIcon)
         userNameTextView = v.findViewById(R.id.userName)
         userEmailTextView = v.findViewById(R.id.userEmail)
@@ -102,8 +99,6 @@ class ProfileFragment : Fragment() {
 
         populateUserInfo()
 
-        populateGrid()
-
         return v;
     }
 
@@ -130,7 +125,8 @@ class ProfileFragment : Fragment() {
                 .addOnSuccessListener {
                     storageRef.downloadUrl.addOnSuccessListener { uri ->
                         // Save image URL to Firebase Database
-                        database.child("users").child(userId).child("profileImageUrl").setValue(uri.toString())
+                        database.child("users").child(userId).child("profileImageUrl")
+                            .setValue(uri.toString())
                     }
                 }
                 .addOnFailureListener {
@@ -141,22 +137,24 @@ class ProfileFragment : Fragment() {
 
     private fun loadProfileImage() {
         val userId = auth.currentUser?.uid ?: return
-        database.child("users").child(userId).child("profileImageUrl").addListenerForSingleValueEvent(object :
-            ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val profileImageUrl = snapshot.getValue(String::class.java)
-                if (!profileImageUrl.isNullOrEmpty()) {
-                    Glide.with(this@ProfileFragment)
-                        .load(profileImageUrl)
-                        .placeholder(R.drawable.default_profile)
-                        .into(profileImageView)
+        database.child("users").child(userId).child("profileImageUrl")
+            .addListenerForSingleValueEvent(object :
+                ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val profileImageUrl = snapshot.getValue(String::class.java)
+                    if (!profileImageUrl.isNullOrEmpty()) {
+                        Glide.with(this@ProfileFragment)
+                            .load(profileImageUrl)
+                            .placeholder(R.drawable.default_profile)
+                            .into(profileImageView)
+                    }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(context, "Failed to load profile image", Toast.LENGTH_SHORT).show()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(context, "Failed to load profile image", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            })
     }
 
     private fun populateUserInfo() {
@@ -180,28 +178,6 @@ class ProfileFragment : Fragment() {
             })
         } else {
             Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun populateGrid() {
-        for (i in 0 until 16) { // 4x4 grid
-            val inflater = LayoutInflater.from(requireContext())
-            val itemView = inflater.inflate(R.layout.grid_item, gridLayout, false)
-            val itemText = itemView.findViewById<TextView>(R.id.itemText)
-
-            itemText.text = "Item ${i + 1}" // Set your item text here
-
-            // Set layout parameters for positioning in GridLayout
-            val layoutParams = GridLayout.LayoutParams().apply {
-                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                width = 0 // Match parent column width
-                height = 0 // Match parent row height
-                setMargins(4, 4, 4, 4) // Margin between items
-            }
-            itemView.layoutParams = layoutParams
-
-            gridLayout.addView(itemView)
         }
     }
 

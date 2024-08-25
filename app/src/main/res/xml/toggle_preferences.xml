@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        android:key="toggle_preference_1"
+        android:title="Toggle 1"
+        android:summary="Enable or disable option 1"
+        android:defaultValue="false" />
+
+    <SwitchPreferenceCompat
+        android:key="toggle_preference_2"
+        android:title="Toggle 2"
+        android:summary="Enable or disable option 2"
+        android:defaultValue="false" />
+</PreferenceScreen>

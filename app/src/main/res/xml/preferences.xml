@@ -1,4 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Header as a preference -->
+    <Preference
+        android:key="header"
+        android:title="Settings"
+        android:layout="@layout/custom_header_layout"
+        android:selectable="false" />
 
-</androidx.preference.PreferenceScreen>
+    <PreferenceCategory
+        android:key="preference_category"
+        android:title="Account"
+        android:layout="@layout/settings_category_title_layout">
+
+        <PreferenceScreen
+            android:key="preference_screen"
+            android:title="Preferences"
+            android:layout="@layout/custom_preference_screen_background"
+            >
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:key="profile_screen"
+            android:title="Profile"
+            android:layout="@layout/custom_preference_screen_background"
+            >
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:key="notifications_screen"
+            android:title="Notifications"
+            android:layout="@layout/custom_preference_screen_background"
+            >
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

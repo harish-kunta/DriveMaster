@@ -5,7 +5,7 @@
     <PreferenceCategory android:title="Account Settings">
 
         <PreferenceScreen
-            android:fragment=".PreferencesFragment"
+            android:fragment="."
             android:summary="Sound effects, haptic feedback, etc."
             android:title="Preferences" />
 
