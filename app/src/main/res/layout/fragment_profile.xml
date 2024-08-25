@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="16dp"
     tools:context=".main_fragments.ProfileFragment">
 
@@ -66,7 +66,7 @@
                     style="@style/ProfilePageSubtitleStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="August 2024" />
+                    android:text="Joined August 2024" />
 
             </LinearLayout>
 
@@ -87,10 +87,10 @@
                     android:id="@+id/editProfileImageButton"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
+                    android:layout_gravity="end|bottom"
                     android:background="@drawable/round_button"
                     android:contentDescription="Profile Image"
                     android:src="@drawable/ic_edit"
-                    android:layout_gravity="end|bottom"
                     app:tint="@color/whiteButtonColor" />
             </FrameLayout>
         </LinearLayout>
@@ -124,6 +124,55 @@
                 android:columnCount="4"
                 android:orientation="horizontal"
                 android:rowCount="4"></GridLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/profile_page_block_background"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                    android:layout_gravity="center"
+                android:src="@drawable/drive_master_logo" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="8dp">
+
+            <TextView
+                style="@style/ProfilePageUserNameStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Invite friends" />
+
+            <TextView
+                style="@style/ProfilePageSubtitleStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tell your friends it's free and easy to practice for driving tests" />
+            </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/inviteFriendsButton"
+                style="@style/GreenButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_marginTop="8dp"
+                android:text="INVITE FRIENDS" />
+
         </LinearLayout>
 
         <Button
