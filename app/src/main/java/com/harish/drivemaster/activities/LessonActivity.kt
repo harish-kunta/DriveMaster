@@ -24,6 +24,7 @@ class LessonActivity : AppCompatActivity() {
     private lateinit var tvQuestion: TextView
     private lateinit var popupMessage: TextView
     private lateinit var popupResultView: LinearLayout
+    private lateinit var correctIcon: ImageView
     private lateinit var tvCorrectAnswer: TextView
     private lateinit var btnSubmit: Button
     private lateinit var progressBar: ProgressBar
@@ -67,6 +68,7 @@ class LessonActivity : AppCompatActivity() {
         popupMessage = findViewById(R.id.tvPopupMessage)
         popupResultView = findViewById(R.id.popUpResultView)
         tvCorrectAnswer = findViewById(R.id.tvCorrectAnswer)
+        correctIcon = findViewById(R.id.correctImage)
         tvHearts = findViewById(R.id.tvHearts)
         btnSubmit.isEnabled = false
     }
@@ -212,6 +214,7 @@ class LessonActivity : AppCompatActivity() {
     private fun showAnswerPopup(isCorrect: Boolean) {
         popupResultView.visibility = View.VISIBLE
         popupMessage.text = if (isCorrect) "Correct Answer!" else "Incorrect!"
+        correctIcon.setImageResource(if (isCorrect) R.drawable.ic_correct_icon else R.drawable.ic_wrong_icon)
         popupMessage.setTextColor(
             ContextCompat.getColor(
                 this,
@@ -227,7 +230,7 @@ class LessonActivity : AppCompatActivity() {
 
         if (!isCorrect) {
             tvCorrectAnswer.visibility = View.VISIBLE
-            tvCorrectAnswer.text = "The correct answer was: $correctAnswer"
+            tvCorrectAnswer.text = "Correct Answer:\n$correctAnswer"
             tvCorrectAnswer.setTextColor(ContextCompat.getColor(this, R.color.wrongAnswerColor))
         }
     }
