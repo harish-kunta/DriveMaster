@@ -3,6 +3,7 @@ package com.harish.drivemaster.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -23,6 +24,7 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var userEmailAddress: TextInputEditText
     private lateinit var userPassword: TextInputEditText
     private lateinit var btnSignUp: Button
+    private lateinit var btnSignIn: TextView
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -36,12 +38,17 @@ class SignUpActivity : AppCompatActivity() {
         userEmailAddress = findViewById(R.id.email_field)
         userPassword = findViewById(R.id.password_field)
         btnSignUp = findViewById(R.id.btnSignUp)
+        btnSignIn = findViewById(R.id.btnSignIn)
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
 
         btnSignUp.setOnClickListener {
             signUpWithEmail()
+        }
+
+        btnSignIn.setOnClickListener {
+            openSignInPage()
         }
 
         configureGoogleSignIn()
@@ -106,8 +113,7 @@ class SignUpActivity : AppCompatActivity() {
             userRef.setValue(userData).addOnCompleteListener { dbTask ->
                 if (dbTask.isSuccessful) {
                     Toast.makeText(this, "Sign-up successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, SignInActivity::class.java))
-                    finish()
+                    openSignInPage()
                 } else {
                     Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show()
                 }
@@ -133,5 +139,12 @@ class SignUpActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Please enter email and password.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // open sign in page
+    fun openSignInPage() {
+        val intent = Intent(this, SignInActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

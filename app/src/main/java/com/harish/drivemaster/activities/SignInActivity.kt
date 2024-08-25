@@ -122,6 +122,7 @@ class SignInActivity : AppCompatActivity() {
     private fun signUp() {
         val intent = Intent(this, SignUpActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
     private fun resetPassword() {

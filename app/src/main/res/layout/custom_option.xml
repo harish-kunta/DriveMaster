@@ -11,10 +11,7 @@
         android:id="@+id/tvOptionText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/textColorSecondary"
-        android:background="@android:color/transparent"
-        android:textStyle="bold"
-        android:textSize="24dp"
+        style="@style/LessonPageOptionStyle"
         android:text="Option text" />
 
 </LinearLayout>

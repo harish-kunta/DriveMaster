@@ -39,6 +39,7 @@ class LessonActivity : AppCompatActivity() {
     private lateinit var currentLevelId: String
     private var selectedAnswer: String? = null
     private var selectedOptionView: View? = null
+    private var selectedOptionText: TextView? = null
     private var isAnswered = false
 
     // Hearts management
@@ -152,7 +153,7 @@ class LessonActivity : AppCompatActivity() {
 
             optionView.setOnClickListener {
                 selectedAnswer = option
-                highlightSelectedOption(optionView)
+                highlightSelectedOption(optionView, tvOptionText)
                 btnSubmit.isEnabled = true
                 btnSubmit.setBackgroundColor(
                     ContextCompat.getColor(
@@ -245,16 +246,20 @@ class LessonActivity : AppCompatActivity() {
     private fun resetAnswerSelection() {
         selectedAnswer = null
         selectedOptionView = null
+        selectedOptionText = null
         btnSubmit.isEnabled = false
         btnSubmit.text = "CHECK"
         isAnswered = false
     }
 
     // Highlight the selected option
-    private fun highlightSelectedOption(selectedView: View) {
+    private fun highlightSelectedOption(selectedView: View, selectedTextView: TextView) {
         selectedOptionView?.setBackgroundResource(R.drawable.option_background_unselected)
+        selectedOptionText?.setTextColor(ContextCompat.getColor(this, R.color.textColorPrimary))
         selectedView.setBackgroundResource(R.drawable.option_background_selected)
+        selectedTextView.setTextColor(ContextCompat.getColor(this, R.color.selectedOptionTextColor))
         selectedOptionView = selectedView
+        selectedOptionText = selectedTextView
     }
 
     // Update the user's points in Firebase

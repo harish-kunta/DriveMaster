@@ -35,7 +35,7 @@ class EntryActivity : AppCompatActivity() {
         btnGetStarted.setOnClickListener {
             if (areNotificationsGranted()) {
                 // If notifications are already granted, proceed directly to SignInActivity
-                val signInIntent = Intent(this, SignInActivity::class.java)
+                val signInIntent = Intent(this, SignUpActivity::class.java)
                 startActivity(signInIntent)
             } else {
                 // Otherwise, open the NotificationsActivity
