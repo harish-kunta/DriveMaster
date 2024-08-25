@@ -201,7 +201,7 @@ class LearnFragment : Fragment() {
                 val userDatabase = FirebaseDatabase.getInstance().reference.child("users")
                 userId?.let {
                     val userLevelRef = userDatabase.child(it).child("completed_levels")
-                    userLevelRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    userLevelRef.addValueEventListener(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }
                             val isCompleted = levelId in completedLevels

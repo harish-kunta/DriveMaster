@@ -36,6 +36,7 @@ class LessonActivity : AppCompatActivity() {
     private var correctAnswer: String? = null
     private lateinit var auth: FirebaseAuth
     private lateinit var currentLevel: String
+    private lateinit var currentLevelId: String
     private var selectedAnswer: String? = null
     private var selectedOptionView: View? = null
     private var isAnswered = false
@@ -70,11 +71,11 @@ class LessonActivity : AppCompatActivity() {
     // Initialize Firebase
     private fun initializeFirebase() {
         auth = FirebaseAuth.getInstance()
-        currentLevel = intent.getStringExtra("levelId") ?: run {
+        currentLevelId = intent.getStringExtra("levelId") ?: run {
             showErrorAndExit("Invalid level ID")
             return
         }
-        currentLevel = "level$currentLevel"
+        currentLevel = "level$currentLevelId"
     }
 
     // Set up event listeners for UI components
@@ -283,22 +284,9 @@ class LessonActivity : AppCompatActivity() {
 
     private fun updateLevelCompletion() {
         val userId = auth.currentUser?.uid ?: return
-        val userProgressRef =
-            FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
-
-        userProgressRef.child(currentLevel).child("completed").setValue(true)
-        unlockNextLevel()
-    }
-
-    private fun unlockNextLevel() {
-        val userId = auth.currentUser?.uid ?: return
-        val currentLevelIndex = currentLevel.replace("level", "").toIntOrNull() ?: return
-        if (currentLevelIndex < 15) {
-            val nextLevel = "level${currentLevelIndex + 1}"
-            val userLevelsRef =
-                FirebaseDatabase.getInstance().getReference("users").child(userId).child("levels")
-            userLevelsRef.child(nextLevel).child("unlocked").setValue(true)
-        }
+        val userLevelsRef =
+            FirebaseDatabase.getInstance().getReference("users").child(userId).child("completed_levels")
+        userLevelsRef.child(currentLevelId).setValue(true)
     }
 
     // Clean the popup and reset it to the default state
