@@ -51,7 +51,7 @@ class LessonActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
 
     // Hearts management
-    private var heartsLeft = 5
+    private var heartsLeft = 0
 
     // Streak management variables
     private var currentStreak = 0
@@ -93,6 +93,59 @@ class LessonActivity : AppCompatActivity() {
             return
         }
         currentLevel = "level$currentLevelId"
+
+        // Load hearts and regeneration time
+        loadHeartsData()
+    }
+
+    // Load hearts and last regeneration time from Firebase
+    private fun loadHeartsData() {
+        val userId = auth.currentUser?.uid ?: return
+        val heartsRef = database.child("users").child(userId).child("hearts")
+
+        heartsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 5
+                val lastRegenTime = dataSnapshot.child("lastRegenTime").getValue(Long::class.java) ?: System.currentTimeMillis()
+
+                // Check if hearts need to be regenerated
+                regenerateHearts(lastRegenTime)
+                updateHeartsDisplay()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                logAndToastError("Failed to load hearts data", databaseError.toException())
+            }
+        })
+    }
+
+    // Regenerate hearts based on the time elapsed
+    private fun regenerateHearts(lastRegenTime: Long) {
+        val currentTime = System.currentTimeMillis()
+        val elapsedTime = currentTime - lastRegenTime
+        val hoursElapsed = elapsedTime / (2 * 60 * 60 * 1000) // 2 hours in milliseconds
+
+        if (hoursElapsed > 0 && heartsLeft < 5) {
+            heartsLeft = minOf(heartsLeft + hoursElapsed.toInt(), 5)
+            saveHeartsData(currentTime)
+        }
+    }
+
+    // Save hearts data to Firebase
+    private fun saveHeartsData(lastRegenTime: Long) {
+        val userId = auth.currentUser?.uid ?: return
+        val heartsData = mapOf(
+            "heartsLeft" to heartsLeft,
+            "lastRegenTime" to lastRegenTime
+        )
+
+        database.child("users").child(userId).child("hearts").setValue(heartsData)
+            .addOnSuccessListener {
+                Log.d("LessonActivity", "Hearts data saved successfully.")
+            }
+            .addOnFailureListener { exception ->
+                logAndToastError("Failed to save hearts data", exception)
+            }
     }
 
     private fun initializeStreakTracking() {
@@ -165,10 +218,13 @@ class LessonActivity : AppCompatActivity() {
         btnSubmit.setOnClickListener {
             // Perform haptic feedback
             HapticFeedbackUtil.performHapticFeedback(this)
-            if (!isAnswered) {
+            if (heartsLeft > 0 && !isAnswered) {
                 evaluateAnswer()
-            } else {
+            } else if (isAnswered) {
                 showNextQuestion()
+            } else {
+                Toast.makeText(this, "You don't have enough hearts to continue.", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
         btnClose.setOnClickListener {
@@ -270,11 +326,22 @@ class LessonActivity : AppCompatActivity() {
 
     // Handle losing a heart
     private fun loseHeart() {
-        heartsLeft--
-        updateHeartsDisplay()
-        if (heartsLeft <= 0) {
-            restartGame()
+        if (heartsLeft > 0) {
+            heartsLeft--
+            saveHeartsData(System.currentTimeMillis())
+            updateHeartsDisplay()
+
+            if (heartsLeft <= 0) {
+                disableGameplay()
+            }
         }
+    }
+
+    private fun disableGameplay() {
+        btnSubmit.isEnabled = false
+        Toast.makeText(this, "You've lost all hearts! Wait for them to regenerate.", Toast.LENGTH_SHORT)
+            .show()
+        // Optionally, you can show a timer or message to the user
     }
 
     // Update the display of hearts remaining
