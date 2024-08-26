@@ -14,7 +14,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val preferenceScreen = findPreference<Preference>("preference_screen")
         preferenceScreen?.setOnPreferenceClickListener {
             // Navigate to TogglePreferencesActivity
-            startActivity(Intent(context, TogglePreferencesActivity::class.java))
+            startActivity(Intent(context, PreferencesActivity::class.java))
             true
         }
     }

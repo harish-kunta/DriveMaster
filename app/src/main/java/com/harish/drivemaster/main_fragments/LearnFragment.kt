@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.LessonActivity
+import com.harish.drivemaster.helpers.HapticFeedbackUtil
 
 class LearnFragment : Fragment() {
 
@@ -211,6 +212,8 @@ class LearnFragment : Fragment() {
                 }
 
                 itemView.setOnClickListener {
+                    // Perform haptic feedback
+                    HapticFeedbackUtil.performHapticFeedback(context)
                     onLevelSelected(levelId)
                 }
             }

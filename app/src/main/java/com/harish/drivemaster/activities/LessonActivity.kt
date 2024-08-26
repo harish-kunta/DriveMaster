@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
+import com.harish.drivemaster.helpers.HapticFeedbackUtil
 
 class LessonActivity : AppCompatActivity() {
 
@@ -86,6 +87,8 @@ class LessonActivity : AppCompatActivity() {
     // Set up event listeners for UI components
     private fun setupEventListeners() {
         btnSubmit.setOnClickListener {
+            // Perform haptic feedback
+            HapticFeedbackUtil.performHapticFeedback(this)
             if (!isAnswered) {
                 evaluateAnswer()
             } else {
@@ -176,6 +179,8 @@ class LessonActivity : AppCompatActivity() {
         val isCorrect = selectedAnswer == correctAnswer
         showAnswerPopup(isCorrect)
         if (isCorrect) {
+            // Perform haptic feedback
+            HapticFeedbackUtil.performHapticFeedback(this)
             updatePoints(10)
         } else {
             loseHeart()

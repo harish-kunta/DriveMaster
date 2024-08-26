@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <SwitchPreferenceCompat
-        android:key="toggle_preference_1"
-        android:title="Toggle 1"
-        android:summary="Enable or disable option 1"
-        android:defaultValue="false" />
+    <Preference
+        android:key="header"
+        android:layout="@layout/custom_header_layout"
+        android:selectable="false"
+        android:title="Preferences" />
 
     <SwitchPreferenceCompat
-        android:key="toggle_preference_2"
-        android:title="Toggle 2"
-        android:summary="Enable or disable option 2"
-        android:defaultValue="false" />
+        android:key="sound_effects"
+        android:title="Sound effects"
+        android:defaultValue="true" />
+
+    <SwitchPreferenceCompat
+        android:key="haptic_feedback"
+        android:title="Haptic feedback"
+        android:defaultValue="true" />
 </PreferenceScreen>
