@@ -267,6 +267,10 @@ class LessonActivity : AppCompatActivity() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 questions.clear()
                 dataSnapshot.children.mapNotNullTo(questions) { it.getValue(Question::class.java) }
+
+                // Randomize the order of questions
+                questions.shuffle()
+
                 if (questions.isNotEmpty()) {
                     updateProgressBar()
                     showNextQuestion()
@@ -307,7 +311,7 @@ class LessonActivity : AppCompatActivity() {
     private fun displayOptions(question: Question) {
         val optionsContainer = findViewById<LinearLayout>(R.id.optionsContainer)
         optionsContainer.removeAllViews()
-        val options = listOf(question.option1, question.option2, question.option3, question.option4)
+        val options = listOf(question.option1, question.option2, question.option3, question.option4).shuffled()
 
         for (option in options) {
             val optionView = layoutInflater.inflate(R.layout.custom_option, optionsContainer, false)
@@ -377,7 +381,7 @@ class LessonActivity : AppCompatActivity() {
 
     // Update the progress bar
     private fun updateProgressBar() {
-        val progress = ((currentQuestionIndex.toDouble() / questions.size) * 100).toInt()
+        val progress = (((currentQuestionIndex + 1).toDouble()  / questions.size) * 100).toInt()
         progressBar.progress = progress
     }
 

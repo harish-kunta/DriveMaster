@@ -14,7 +14,7 @@
 
         <ImageView
             android:id="@+id/btnClose"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="8dp"
@@ -24,37 +24,38 @@
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="8dp"
-            android:layout_weight="0.8"
+            android:layout_weight="0.7"
             android:max="100"
             android:progress="0"
             android:progressDrawable="@drawable/progress_bar_drawable" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.1"
-            android:orientation="horizontal">
+            android:layout_weight="0.2"
+            android:orientation="horizontal"
+            android:weightSum="1">
 
             <ImageView
                 android:id="@+id/hearticon"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:layout_margin="8dp"
                 android:layout_weight="0.5"
                 android:src="@drawable/heart_icon" />
 
             <TextView
                 android:id="@+id/tvHearts"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
-                android:gravity="center"
+                android:gravity="left|center_vertical"
                 android:text="0"
+                android:layout_marginLeft="8dp"
                 android:textColor="@color/heartColor"
                 android:textSize="24sp"
                 android:textStyle="bold" />
