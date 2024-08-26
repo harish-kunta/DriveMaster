@@ -97,6 +97,8 @@ class LessonActivity : AppCompatActivity() {
             }
         }
         btnClose.setOnClickListener {
+            // Perform haptic feedback
+            HapticFeedbackUtil.performHapticFeedback(this)
             finish()
         }
     }

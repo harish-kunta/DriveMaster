@@ -6,10 +6,11 @@ import android.media.MediaPlayer
 import androidx.preference.PreferenceManager
 import com.harish.drivemaster.R
 
-class SoundUtil private constructor(private val context: Context) {
-
+class SoundUtil private constructor(context: Context) {
+    private val context: Context = context.applicationContext
     private val sharedPreferences: SharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(context)
+        PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+    private val mediaPlayer = MediaPlayer()
 
     fun playSuccessSound() {
         if (isSoundEnabled()) {
@@ -24,10 +25,19 @@ class SoundUtil private constructor(private val context: Context) {
     }
 
     private fun playSound(soundResId: Int) {
-        val mediaPlayer = MediaPlayer.create(context, soundResId)
+        mediaPlayer.reset() // Reset the media player to reuse it
+        val assetFileDescriptor = context.resources.openRawResourceFd(soundResId)
+        mediaPlayer.setDataSource(
+            assetFileDescriptor.fileDescriptor,
+            assetFileDescriptor.startOffset,
+            assetFileDescriptor.length
+        )
+        assetFileDescriptor.close()
+
         mediaPlayer.setOnCompletionListener { mp ->
-            mp.release() // Release resources after playback
+            mp.reset() // Reset after playback to prepare for the next sound
         }
+        mediaPlayer.prepare()
         mediaPlayer.start()
     }
 
@@ -36,13 +46,14 @@ class SoundUtil private constructor(private val context: Context) {
     }
 
     companion object {
+        @Volatile
         private var instance: SoundUtil? = null
 
         fun getInstance(context: Context): SoundUtil {
-            if (instance == null) {
-                instance = SoundUtil(context.applicationContext)
+            return instance ?: synchronized(this) {
+                instance ?: SoundUtil(context).also { instance = it }
             }
-            return instance!!
         }
     }
 }
+

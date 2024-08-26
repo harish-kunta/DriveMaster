@@ -6,6 +6,11 @@
         android:selectable="false"
         android:title="Preferences" />
 
+    <PreferenceCategory
+        android:key="preference_category"
+        android:layout="@layout/settings_category_title_layout"
+        android:title="Lesson experience">
+
     <SwitchPreferenceCompat
         android:key="sound_effects"
         android:title="Sound effects"
@@ -15,4 +20,5 @@
         android:key="haptic_feedback"
         android:title="Haptic feedback"
         android:defaultValue="true" />
+    </PreferenceCategory>
 </PreferenceScreen>
