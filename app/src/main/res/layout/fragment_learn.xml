@@ -6,14 +6,19 @@
     android:padding="16dp"
     android:orientation="vertical">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Learn"
-        android:textColor="@color/textColorPrimary"
-        android:textSize="32dp"
-        android:textStyle="bold"
-        />
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/ProfilePageTitleStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_weight="0.8"
+            android:text="Learn" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

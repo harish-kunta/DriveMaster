@@ -14,24 +14,14 @@
         android:id="@+id/levelNumber"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:layout_margin="4dp"
-        android:background="@android:color/transparent"
         android:text="99"
-        android:textColor="@color/textColorWhite"
-        android:textStyle="bold"
-        android:textSize="64sp" />
+        style="@style/LearnPageLevelNumberStyle"/>
+
     <TextView
         android:id="@+id/levelButton"
+        style="@style/LearnPageLevelTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_margin="4dp"
-        android:layout_weight="0.1"
-        android:background="@android:color/transparent"
-        android:text="Level"
-        android:textColor="@color/textColorWhite"
-        android:textSize="16sp" />
+        android:text="Level" />
 </LinearLayout>
 
