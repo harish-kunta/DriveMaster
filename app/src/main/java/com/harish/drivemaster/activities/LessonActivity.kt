@@ -17,6 +17,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
@@ -56,6 +58,9 @@ class LessonActivity : AppCompatActivity() {
     private var selectedOptionText: TextView? = null
     private var isAnswered = false
     private lateinit var database: DatabaseReference
+
+    // Data & State Management
+    private var accumulatedPoints = 0
 
     // Hearts management
     private var heartsLeft = 0
@@ -333,7 +338,7 @@ class LessonActivity : AppCompatActivity() {
         showAnswerPopup(isCorrect)
         if (isCorrect) {
             SoundUtil.getInstance(this).playSuccessSound()
-            updatePoints(10)
+            accumulatedPoints += 10  // Accumulate points locally
         } else {
             SoundUtil.getInstance(this).playFailureSound()
             loseHeart()
@@ -452,11 +457,37 @@ class LessonActivity : AppCompatActivity() {
 
     // Mark the current level as completed and unlock the next level
     private fun completeLevel() {
+        updatePointsInDatabase()
         updateLevelCompletion()
         checkAndUpdateStreak()
         Toast.makeText(this@LessonActivity, "You've completed the lesson!", Toast.LENGTH_SHORT)
             .show()
         finish()
+    }
+
+    private fun updatePointsInDatabase() {
+        val userId = auth.currentUser?.uid ?: return
+        val pointsRef = database.child(USERS_REF).child(userId).child("points")
+
+        pointsRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val currentPoints = currentData.getValue(Int::class.java) ?: 0
+                currentData.value = currentPoints + accumulatedPoints
+                return Transaction.success(currentData)
+            }
+
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                currentData: DataSnapshot?
+            ) {
+                if (databaseError != null) {
+                    logAndToastError("Failed to update points", databaseError.toException())
+                } else {
+                    Log.d("LessonActivity", "Points updated successfully.")
+                }
+            }
+        })
     }
 
     private fun updateLevelCompletion() {
