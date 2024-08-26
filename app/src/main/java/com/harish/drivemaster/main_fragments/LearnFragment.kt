@@ -48,8 +48,7 @@ class LearnFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_learn, container, false)
         initializeUIComponents(view)
-        initializeFirebase()
-        loadLevels()
+        initializeFirebaseAndLoadData()
         return view
     }
 
@@ -57,27 +56,24 @@ class LearnFragment : Fragment() {
         levelsContainer = view.findViewById(R.id.recyclerView)
         streakValue = view.findViewById(R.id.streakValue)
         heartsValue = view.findViewById(R.id.heartsValue)
-
     }
 
-    private fun initializeFirebase() {
+    private fun initializeFirebaseAndLoadData() {
         auth = FirebaseAuth.getInstance()
         lessonsDatabase = FirebaseDatabase.getInstance().reference.child("lessons")
         userDatabase = FirebaseDatabase.getInstance().reference.child("users")
 
-        // Load the streak and hearts values
-        loadStreakAndHeartsData()
+        loadUserData()
+        loadLevels()
     }
 
-    private fun loadStreakAndHeartsData() {
+    private fun loadUserData() {
         val userId = auth.currentUser?.uid ?: return
         val userRef = userDatabase.child(userId)
 
-        // Load streak value
-        userRef.child("streak").addValueEventListener(object : ValueEventListener {
+        userRef.child("streak").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val currentStreak = dataSnapshot.child("currentStreak").getValue(Int::class.java) ?: 0
-                streakValue.text = currentStreak.toString()
+                streakValue.text = (dataSnapshot.child("currentStreak").getValue(Int::class.java) ?: 0).toString()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -85,16 +81,11 @@ class LearnFragment : Fragment() {
             }
         })
 
-        // Load hearts value
-        userRef.child("hearts").addValueEventListener(object : ValueEventListener {
+        userRef.child("hearts").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 0
-
                 val lastRegenTime = dataSnapshot.child("lastRegenTime").getValue(Long::class.java) ?: System.currentTimeMillis()
-
-                // Check if hearts need to be regenerated
-                regenerateHearts(lastRegenTime)
-                heartsValue.text = heartsLeft.toString()
+                regenerateHeartsIfNeeded(lastRegenTime)
                 updateHeartsDisplay()
             }
 
@@ -104,13 +95,7 @@ class LearnFragment : Fragment() {
         })
     }
 
-    // Update the display of hearts remaining
-    private fun updateHeartsDisplay() {
-        heartsValue.text = heartsLeft.toString()
-    }
-
-    // Regenerate hearts based on the time elapsed
-    private fun regenerateHearts(lastRegenTime: Long) {
+    private fun regenerateHeartsIfNeeded(lastRegenTime: Long) {
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - lastRegenTime
         val hoursElapsed = elapsedTime / (2 * 60 * 60 * 1000) // 2 hours in milliseconds
@@ -121,32 +106,25 @@ class LearnFragment : Fragment() {
         }
     }
 
-    // Save hearts data to Firebase
     private fun saveHeartsData(lastRegenTime: Long) {
-        val userId = auth.currentUser?.uid ?: return
-        val heartsData = mapOf(
-            "heartsLeft" to heartsLeft,
-            "lastRegenTime" to lastRegenTime
-        )
-
-        userDatabase.child(userId).child("hearts").setValue(heartsData)
-            .addOnSuccessListener {
-                Log.d("LessonActivity", "Hearts data saved successfully.")
-            }
-            .addOnFailureListener { exception ->
+        auth.currentUser?.uid?.let { userId ->
+            userDatabase.child(userId).child("hearts").setValue(mapOf(
+                "heartsLeft" to heartsLeft,
+                "lastRegenTime" to lastRegenTime
+            )).addOnFailureListener { exception ->
                 logAndToastError("Failed to save hearts data", exception)
             }
+        }
     }
 
     private fun loadLevels() {
-        lessonsDatabase.addValueEventListener(object : ValueEventListener {
+        lessonsDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                try {
-                    val levels = parseLevels(snapshot)
-                    listenForUserLevelUpdates(levels)
-                } catch (e: Exception) {
-                    logAndToastError("Failed to load levels", e)
+                val levels = levelCategories.mapNotNull { (categoryName, levelRange) ->
+                    val levelsInCategory = levelRange.filter { snapshot.hasChild("level$it") }
+                    if (levelsInCategory.isNotEmpty()) LevelCategory(categoryName, levelsInCategory) else null
                 }
+                listenForUserLevelUpdates(levels)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -158,7 +136,7 @@ class LearnFragment : Fragment() {
     private fun listenForUserLevelUpdates(levels: List<LevelCategory>) {
         auth.currentUser?.uid?.let { userId ->
             userDatabase.child(userId).child("completed_levels")
-                .addValueEventListener(object : ValueEventListener {
+                .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val completedLevels = snapshot.children.mapNotNull { it.key?.toInt() }.toSet()
                         setupRecyclerView(levels, completedLevels)
@@ -171,20 +149,10 @@ class LearnFragment : Fragment() {
         }
     }
 
-    private fun parseLevels(snapshot: DataSnapshot): List<LevelCategory> {
-        return levelCategories.mapNotNull { (categoryName, levelRange) ->
-            val levelsInCategory = levelRange.mapNotNull { levelId ->
-                if (snapshot.hasChild("level$levelId")) levelId else null
-            }
-            if (levelsInCategory.isNotEmpty()) LevelCategory(categoryName, levelsInCategory) else null
-        }
-    }
-
     private fun setupRecyclerView(levels: List<LevelCategory>, completedLevels: Set<Int>) {
-        val maxCompletedLevel = completedLevels.maxOrNull() ?: 0
         levelsContainer.layoutManager = LinearLayoutManager(context)
-        levelsContainer.adapter = LevelCategoryAdapter(levels, completedLevels, maxCompletedLevel) { levelId ->
-            if (levelId <= maxCompletedLevel + 1) {
+        levelsContainer.adapter = LevelCategoryAdapter(levels, completedLevels, completedLevels.maxOrNull() ?: 0) { levelId ->
+            if (levelId <= (completedLevels.maxOrNull() ?: 0) + 1) {
                 navigateToLessonActivity(levelId)
             } else {
                 showLockedLevelPopup()
@@ -194,13 +162,16 @@ class LearnFragment : Fragment() {
 
     private fun navigateToLessonActivity(levelId: Int) {
         if (heartsLeft > 0) {
-            val intent = Intent(context, LessonActivity::class.java).apply {
+            startActivity(Intent(context, LessonActivity::class.java).apply {
                 putExtra("levelId", levelId.toString())
-            }
-            startActivity(intent)
+            })
         } else {
             showNoHeartsPopup()
         }
+    }
+
+    private fun updateHeartsDisplay() {
+        heartsValue.text = heartsLeft.toString()
     }
 
     private fun showNoHeartsPopup() {
