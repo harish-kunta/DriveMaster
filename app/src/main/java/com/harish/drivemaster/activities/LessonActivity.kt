@@ -21,6 +21,13 @@ import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
 import com.harish.drivemaster.helpers.SoundUtil
+import com.harish.drivemaster.models.FirebaseConstants.Companion.COMPLETED_LEVELS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.CURRENT_STREAK_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.HEARTS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.LAST_ACTIVITY_DATE_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.LESSONS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 import java.time.LocalDate
 
 class LessonActivity : AppCompatActivity() {
@@ -101,7 +108,7 @@ class LessonActivity : AppCompatActivity() {
     // Load hearts and last regeneration time from Firebase
     private fun loadHeartsData() {
         val userId = auth.currentUser?.uid ?: return
-        val heartsRef = database.child("users").child(userId).child("hearts")
+        val heartsRef = database.child(USERS_REF).child(userId).child(HEARTS_REF)
 
         heartsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -139,7 +146,7 @@ class LessonActivity : AppCompatActivity() {
             "lastRegenTime" to lastRegenTime
         )
 
-        database.child("users").child(userId).child("hearts").setValue(heartsData)
+        database.child(USERS_REF).child(userId).child(HEARTS_REF).setValue(heartsData)
             .addOnSuccessListener {
                 Log.d("LessonActivity", "Hearts data saved successfully.")
             }
@@ -150,12 +157,12 @@ class LessonActivity : AppCompatActivity() {
 
     private fun initializeStreakTracking() {
         val userId = auth.currentUser?.uid ?: return
-        val streakRef = database.child("users").child(userId).child("streak")
+        val streakRef = database.child(USERS_REF).child(userId).child(STREAK_REF)
 
         streakRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                currentStreak = dataSnapshot.child("currentStreak").getValue(Int::class.java) ?: 0
-                lastActivityDate = dataSnapshot.child("lastActivityDate").getValue(String::class.java)?.let {
+                currentStreak = dataSnapshot.child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
+                lastActivityDate = dataSnapshot.child(LAST_ACTIVITY_DATE_REF).getValue(String::class.java)?.let {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         LocalDate.parse(it)
                     } else {
@@ -197,11 +204,11 @@ class LessonActivity : AppCompatActivity() {
 
     private fun saveStreakData(today: LocalDate) {
         val userId = auth.currentUser?.uid ?: return
-        val streakRef = database.child("users").child(userId).child("streak")
+        val streakRef = database.child(USERS_REF).child(userId).child(STREAK_REF)
 
         val streakData = mapOf(
-            "currentStreak" to currentStreak,
-            "lastActivityDate" to today.toString()
+            CURRENT_STREAK_REF to currentStreak,
+            LAST_ACTIVITY_DATE_REF to today.toString()
         )
 
         streakRef.setValue(streakData)
@@ -238,7 +245,7 @@ class LessonActivity : AppCompatActivity() {
     // Fetch questions from Firebase
     private fun fetchQuestionsFromFirebase() {
         val questionsRef = FirebaseDatabase.getInstance()
-            .getReference("lessons")
+            .getReference(LESSONS_REF)
             .child(currentLevel)
             .child("questions")
 
@@ -423,7 +430,7 @@ class LessonActivity : AppCompatActivity() {
     // Update the user's points in Firebase
     private fun updatePoints(points: Int) {
         val userId = auth.currentUser?.uid ?: return
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
+        val userRef = FirebaseDatabase.getInstance().getReference(USERS_REF).child(userId)
 
         userRef.child("points").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -449,8 +456,8 @@ class LessonActivity : AppCompatActivity() {
     private fun updateLevelCompletion() {
         val userId = auth.currentUser?.uid ?: return
         val userLevelsRef =
-            FirebaseDatabase.getInstance().getReference("users").child(userId)
-                .child("completed_levels")
+            FirebaseDatabase.getInstance().getReference(USERS_REF).child(userId)
+                .child(COMPLETED_LEVELS_REF)
         userLevelsRef.child(currentLevelId).setValue(true)
     }
 

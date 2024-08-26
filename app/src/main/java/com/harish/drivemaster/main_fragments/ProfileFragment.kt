@@ -23,6 +23,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.SettingsActivity
+import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 import de.hdodenhof.circleimageview.CircleImageView
 
 private const val ARG_PARAM1 = "param1"
@@ -118,7 +119,7 @@ class ProfileFragment : Fragment() {
                 .addOnSuccessListener {
                     storageRef.downloadUrl.addOnSuccessListener { uri ->
                         // Save image URL to Firebase Database
-                        database.child("users").child(userId).child("profileImageUrl")
+                        database.child(USERS_REF).child(userId).child("profileImageUrl")
                             .setValue(uri.toString())
                     }
                 }
@@ -130,7 +131,7 @@ class ProfileFragment : Fragment() {
 
     private fun loadProfileImage() {
         val userId = auth.currentUser?.uid ?: return
-        database.child("users").child(userId).child("profileImageUrl")
+        database.child(USERS_REF).child(userId).child("profileImageUrl")
             .addListenerForSingleValueEvent(object :
                 ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -153,7 +154,7 @@ class ProfileFragment : Fragment() {
     private fun populateUserInfo() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
-            database.child("users").child(userId).addListenerForSingleValueEvent(object :
+            database.child(USERS_REF).child(userId).addListenerForSingleValueEvent(object :
                 ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val userName = snapshot.child("name").getValue(String::class.java)
