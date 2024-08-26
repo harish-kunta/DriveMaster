@@ -96,7 +96,7 @@ class LearnFragment : Fragment() {
         val userRef = userDatabase.child(userId)
 
         try {
-            userRef.child(STREAK_REF).addListenerForSingleValueEvent(object : ValueEventListener {
+            userRef.child(STREAK_REF).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val currentStreak =
                         dataSnapshot.child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
@@ -108,7 +108,7 @@ class LearnFragment : Fragment() {
                 }
             })
 
-            userRef.child(HEARTS_REF).addListenerForSingleValueEvent(object : ValueEventListener {
+            userRef.child(HEARTS_REF).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 0
                     val lastRegenTime =
@@ -165,7 +165,7 @@ class LearnFragment : Fragment() {
 
     private fun loadLevels() {
         try {
-            lessonsDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
+            lessonsDatabase.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     try {
                         val levels = levelCategories.mapNotNull { (categoryName, levelRange) ->
@@ -196,7 +196,7 @@ class LearnFragment : Fragment() {
 
         try {
             userDatabase.child(userId).child(COMPLETED_LEVELS_REF)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
+                .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         try {
                             val completedLevels =

@@ -113,7 +113,8 @@ class LessonActivity : AppCompatActivity() {
         heartsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 5
-                val lastRegenTime = dataSnapshot.child("lastRegenTime").getValue(Long::class.java) ?: System.currentTimeMillis()
+                val lastRegenTime = dataSnapshot.child("lastRegenTime").getValue(Long::class.java)
+                    ?: System.currentTimeMillis()
 
                 // Check if hearts need to be regenerated
                 regenerateHearts(lastRegenTime)
@@ -161,14 +162,16 @@ class LessonActivity : AppCompatActivity() {
 
         streakRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                currentStreak = dataSnapshot.child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
-                lastActivityDate = dataSnapshot.child(LAST_ACTIVITY_DATE_REF).getValue(String::class.java)?.let {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        LocalDate.parse(it)
-                    } else {
-                        TODO("VERSION.SDK_INT < O")
-                    }
-                } ?: LocalDate.now()
+                currentStreak =
+                    dataSnapshot.child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
+                lastActivityDate =
+                    dataSnapshot.child(LAST_ACTIVITY_DATE_REF).getValue(String::class.java)?.let {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            LocalDate.parse(it)
+                        } else {
+                            TODO("VERSION.SDK_INT < O")
+                        }
+                    } ?: LocalDate.now()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -188,10 +191,12 @@ class LessonActivity : AppCompatActivity() {
             today.isEqual(lastActivityDate) -> {
                 // Same day, streak remains the same
             }
+
             today.isEqual(lastActivityDate.plusDays(1)) -> {
                 // Next day, increment streak
                 currentStreak++
             }
+
             else -> {
                 // More than a day passed, reset streak
                 currentStreak = 1
@@ -230,7 +235,11 @@ class LessonActivity : AppCompatActivity() {
             } else if (isAnswered) {
                 showNextQuestion()
             } else {
-                Toast.makeText(this, "You don't have enough hearts to continue.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this,
+                    "You don't have enough hearts to continue.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
                 finish()
             }
@@ -347,21 +356,18 @@ class LessonActivity : AppCompatActivity() {
 
     private fun disableGameplay() {
         btnSubmit.isEnabled = false
-        Toast.makeText(this, "You've lost all hearts! Wait for them to regenerate.", Toast.LENGTH_SHORT)
+        Toast.makeText(
+            this,
+            "You've lost all hearts! Wait for them to regenerate.",
+            Toast.LENGTH_SHORT
+        )
             .show()
-        // Optionally, you can show a timer or message to the user
+        finish()
     }
 
     // Update the display of hearts remaining
     private fun updateHeartsDisplay() {
         tvHearts.text = heartsLeft.toString()
-    }
-
-    // Restart the game when all hearts are lost
-    private fun restartGame() {
-        Toast.makeText(this, "You've lost all hearts! Restarting the game.", Toast.LENGTH_SHORT)
-            .show()
-        finish()
     }
 
     // Update the progress bar
