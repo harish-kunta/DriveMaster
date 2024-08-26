@@ -18,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
+import com.harish.drivemaster.helpers.SoundUtil
 
 class LessonActivity : AppCompatActivity() {
 
@@ -177,12 +178,14 @@ class LessonActivity : AppCompatActivity() {
     // Evaluate the selected answer
     private fun evaluateAnswer() {
         val isCorrect = selectedAnswer == correctAnswer
+        // Perform haptic feedback
+        HapticFeedbackUtil.performHapticFeedback(this)
         showAnswerPopup(isCorrect)
         if (isCorrect) {
-            // Perform haptic feedback
-            HapticFeedbackUtil.performHapticFeedback(this)
+            SoundUtil.getInstance(this).playSuccessSound()
             updatePoints(10)
         } else {
+            SoundUtil.getInstance(this).playFailureSound()
             loseHeart()
         }
         updateCheckButton(isCorrect)
