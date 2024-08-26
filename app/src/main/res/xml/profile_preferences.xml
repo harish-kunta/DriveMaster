@@ -1,61 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="header"
+        android:layout="@layout/custom_header_layout"
+        android:selectable="false"
+        android:title="Profile" />
 
-    <!-- Profile Information -->
     <PreferenceCategory
-        android:title="Profile Information">
-
-        <!-- Change Name -->
+        android:key="preference_category"
+        android:layout="@layout/settings_category_title_layout"
+        android:title="Name">
         <EditTextPreference
-            android:key="change_name"
-            android:title="Change Name"
-            android:summary="Update your display name."
+            android:defaultValue="Your Name"
             android:dialogTitle="Enter new name"
             android:inputType="textPersonName"
-            android:defaultValue="Your Name"/>
-
-        <!-- Change Password -->
-        <PreferenceScreen
-            android:key="change_password"
-            android:title="Change Password"
-            android:summary="Update your account password."
-            android:icon="@drawable/ic_password">
-            <!-- Change Password Subscreen -->
-<!--            <intent-->
-<!--                android:targetPackage="com.example.app"-->
-<!--                android:targetClass="com.example.app.ChangePasswordActivity"-->
-<!--                android:action="android.intent.action.VIEW"-->
-<!--                android:data="profile/change_password"/>-->
-        </PreferenceScreen>
-
-        <!-- Change Phone Number -->
-        <EditTextPreference
-            android:key="change_phone_number"
-            android:title="Change Phone Number"
-            android:summary="Update your phone number."
-            android:dialogTitle="Enter new phone number"
-            android:inputType="phone"
-            android:defaultValue="Your Phone Number"/>
-
+            android:key="change_name"
+            android:title="Change Name" />
     </PreferenceCategory>
 
-    <!-- Additional Settings -->
     <PreferenceCategory
-        android:title="Additional Settings">
+        android:key="preference_category"
+        android:layout="@layout/settings_category_title_layout"
+        android:title="Password">
 
-        <!-- Profile Picture -->
-        <PreferenceScreen
-            android:key="profile_picture"
-            android:title="Change Profile Picture"
-            android:summary="Update your profile picture.">
-            <!-- Change Profile Picture Subscreen -->
-<!--            <intent-->
-<!--                android:targetPackage="com.example.app"-->
-<!--                android:targetClass="com.example.app.ChangeProfilePictureActivity"-->
-<!--                android:action="android.intent.action.VIEW"-->
-<!--                android:data="profile/change_picture"/>-->
-        </PreferenceScreen>
+        <EditTextPreference
+            android:defaultValue="Your password"
+            android:dialogTitle="Enter new password"
+            android:inputType="textPassword"
+            android:key="change_password"
+            android:title="Change Password" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="preference_category"
+        android:layout="@layout/settings_category_title_layout"
+        android:title="Email">
+
+        <EditTextPreference
+            android:defaultValue="Your email"
+            android:dialogTitle="Enter new email"
+            android:inputType="textEmailAddress"
+            android:key="change_email"
+            android:title="Change Email" />
 
     </PreferenceCategory>
+
+    <!--    <com.harish.drivemaster.settings_fragments.ButtonPreference-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:key="delete_account"-->
+    <!--        android:title="Delete Account" />-->
 
 </PreferenceScreen>

@@ -22,9 +22,13 @@
             android:exported="false"
             android:label="@string/title_activity_settings" />
         <activity
-            android:name=".main_fragments.PreferencesActivity"
+            android:name=".settings_fragments.PreferencesActivity"
             android:exported="false"
             android:label="@string/title_toggle_preferences" />
+        <activity
+            android:name=".settings_fragments.ProfilePreferencesActivity"
+            android:exported="false"
+            android:label="@string/profile_toggle_preferences" />
         <activity
             android:name=".activities.WelcomeActivity"
             android:exported="false" />

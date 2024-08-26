@@ -1,23 +1,23 @@
-package com.harish.drivemaster.main_fragments
+package com.harish.drivemaster.settings_fragments
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.harish.drivemaster.R
 
-class PreferencesActivity : AppCompatActivity() {
+class ProfilePreferencesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportFragmentManager
             .beginTransaction()
-            .replace(android.R.id.content, TogglePreferencesFragment())
+            .replace(android.R.id.content, ProfilePreferencesFragment())
             .commit()
     }
 }
 
-class TogglePreferencesFragment : PreferenceFragmentCompat() {
+class ProfilePreferencesFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.toggle_preferences, rootKey)
+        setPreferencesFromResource(R.xml.profile_preferences, rootKey)
     }
 }
 
