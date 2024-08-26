@@ -29,6 +29,10 @@ class LearnFragment : Fragment() {
     private lateinit var lessonsDatabase: DatabaseReference
     private lateinit var userDatabase: DatabaseReference
     private lateinit var levelsContainer: RecyclerView
+    private lateinit var streakValue: TextView
+    private lateinit var heartsValue: TextView
+
+    private var heartsLeft: Int = 0
 
     private val levelCategories = listOf(
         "Beginner" to 1..3,
@@ -51,12 +55,87 @@ class LearnFragment : Fragment() {
 
     private fun initializeUIComponents(view: View) {
         levelsContainer = view.findViewById(R.id.recyclerView)
+        streakValue = view.findViewById(R.id.streakValue)
+        heartsValue = view.findViewById(R.id.heartsValue)
+
     }
 
     private fun initializeFirebase() {
         auth = FirebaseAuth.getInstance()
         lessonsDatabase = FirebaseDatabase.getInstance().reference.child("lessons")
         userDatabase = FirebaseDatabase.getInstance().reference.child("users")
+
+        // Load the streak and hearts values
+        loadStreakAndHeartsData()
+    }
+
+    private fun loadStreakAndHeartsData() {
+        val userId = auth.currentUser?.uid ?: return
+        val userRef = userDatabase.child(userId)
+
+        // Load streak value
+        userRef.child("streak").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val currentStreak = dataSnapshot.child("currentStreak").getValue(Int::class.java) ?: 0
+                streakValue.text = currentStreak.toString()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                logAndToastError("Failed to load streak data", databaseError.toException())
+            }
+        })
+
+        // Load hearts value
+        userRef.child("hearts").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 0
+
+                val lastRegenTime = dataSnapshot.child("lastRegenTime").getValue(Long::class.java) ?: System.currentTimeMillis()
+
+                // Check if hearts need to be regenerated
+                regenerateHearts(lastRegenTime)
+                heartsValue.text = heartsLeft.toString()
+                updateHeartsDisplay()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                logAndToastError("Failed to load hearts data", databaseError.toException())
+            }
+        })
+    }
+
+    // Update the display of hearts remaining
+    private fun updateHeartsDisplay() {
+        heartsValue.text = heartsLeft.toString()
+    }
+
+    // Regenerate hearts based on the time elapsed
+    private fun regenerateHearts(lastRegenTime: Long) {
+        val currentTime = System.currentTimeMillis()
+        val elapsedTime = currentTime - lastRegenTime
+        val hoursElapsed = elapsedTime / (2 * 60 * 60 * 1000) // 2 hours in milliseconds
+
+        if (hoursElapsed > 0 && heartsLeft < 5) {
+            heartsLeft = minOf(heartsLeft + hoursElapsed.toInt(), 5)
+            saveHeartsData(currentTime)
+        }
+    }
+
+    // Save hearts data to Firebase
+    private fun saveHeartsData(lastRegenTime: Long) {
+        val userId = auth.currentUser?.uid ?: return
+        val heartsData = mapOf(
+            "heartsLeft" to heartsLeft,
+            "lastRegenTime" to lastRegenTime
+        )
+
+        userDatabase.child(userId).child("hearts").setValue(heartsData)
+            .addOnSuccessListener {
+                Log.d("LessonActivity", "Hearts data saved successfully.")
+            }
+            .addOnFailureListener { exception ->
+                logAndToastError("Failed to save hearts data", exception)
+            }
     }
 
     private fun loadLevels() {
@@ -114,10 +193,22 @@ class LearnFragment : Fragment() {
     }
 
     private fun navigateToLessonActivity(levelId: Int) {
-        val intent = Intent(context, LessonActivity::class.java).apply {
-            putExtra("levelId", levelId.toString())
+        if (heartsLeft > 0) {
+            val intent = Intent(context, LessonActivity::class.java).apply {
+                putExtra("levelId", levelId.toString())
+            }
+            startActivity(intent)
+        } else {
+            showNoHeartsPopup()
         }
-        startActivity(intent)
+    }
+
+    private fun showNoHeartsPopup() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("No Hearts Left")
+            .setMessage("You don't have any hearts left to start a new lesson. Please wait or earn more hearts.")
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     private fun showLockedLevelPopup() {

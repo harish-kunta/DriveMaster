@@ -32,7 +32,7 @@
                 style="@style/ProfilePageUserNameStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="999" />
+                android:text="0" />
         </LinearLayout>
 
         <TextView
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:paddingLeft="4dp"
-                android:text="5" />
+                android:text="0" />
         </LinearLayout>
     </LinearLayout>
 

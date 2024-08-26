@@ -103,7 +103,7 @@ class LessonActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val heartsRef = database.child("users").child(userId).child("hearts")
 
-        heartsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        heartsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 5
                 val lastRegenTime = dataSnapshot.child("lastRegenTime").getValue(Long::class.java) ?: System.currentTimeMillis()
@@ -152,7 +152,7 @@ class LessonActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val streakRef = database.child("users").child(userId).child("streak")
 
-        streakRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        streakRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 currentStreak = dataSnapshot.child("currentStreak").getValue(Int::class.java) ?: 0
                 lastActivityDate = dataSnapshot.child("lastActivityDate").getValue(String::class.java)?.let {
@@ -225,6 +225,7 @@ class LessonActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "You don't have enough hearts to continue.", Toast.LENGTH_SHORT)
                     .show()
+                finish()
             }
         }
         btnClose.setOnClickListener {
