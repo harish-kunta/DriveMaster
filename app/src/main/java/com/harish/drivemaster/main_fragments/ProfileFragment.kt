@@ -32,9 +32,13 @@ class ProfileFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    // UI Components
     private lateinit var settingsIcon: ImageView
     private lateinit var userNameTextView: TextView
     private lateinit var userEmailTextView: TextView
+    private lateinit var streakValue: TextView
+    private lateinit var xpValue: TextView
     private lateinit var profileImageView: CircleImageView
     private lateinit var editProfileImageButton: ImageButton
     private lateinit var profilePictureSection: FrameLayout
@@ -63,6 +67,8 @@ class ProfileFragment : Fragment() {
         profilePictureSection = v.findViewById(R.id.profilePictureSection)
         profileImageView = v.findViewById(R.id.profileImageView)
         editProfileImageButton = v.findViewById(R.id.editProfileImageButton)
+        streakValue = v.findViewById(R.id.streakValue)
+        xpValue = v.findViewById(R.id.xpValue)
 
         settingsIcon.setOnClickListener {
             val settingIntent = Intent(activity, SettingsActivity::class.java)
@@ -156,6 +162,12 @@ class ProfileFragment : Fragment() {
                     // Set the values to the TextViews
                     userNameTextView.text = userName ?: "User Name"
                     userEmailTextView.text = userEmail ?: "user@example.com"
+
+                    // Fetch and display streak
+                    val currentStreak = snapshot.child("streak").child("currentStreak").getValue(Int::class.java) ?: 0
+                    val currentXP = snapshot.child("points").getValue(Int::class.java) ?: 0
+                    streakValue.text = currentStreak.toString()
+                    xpValue.text = currentXP.toString()
                 }
 
                 override fun onCancelled(error: DatabaseError) {

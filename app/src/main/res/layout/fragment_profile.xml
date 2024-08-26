@@ -153,10 +153,11 @@
                             android:layout_gravity="center">
 
                             <TextView
+                                android:id="@+id/streakValue"
                                 style="@style/ProfilePageUserNameStyle"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:text="1"
+                                android:text="0"
                                 android:layout_gravity="center"
                                 android:textAppearance="?attr/textAppearanceListItem" />
                         </LinearLayout>
@@ -211,10 +212,11 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/xpValue"
                                 style="@style/ProfilePageUserNameStyle"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:text="531"
+                                android:text="0"
                                 android:layout_gravity="center"
                                 android:textAppearance="?attr/textAppearanceListItem" />
 

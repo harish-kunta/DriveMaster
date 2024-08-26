@@ -1,5 +1,6 @@
 package com.harish.drivemaster.activities
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,11 +15,13 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
 import com.harish.drivemaster.helpers.SoundUtil
+import java.time.LocalDate
 
 class LessonActivity : AppCompatActivity() {
 
@@ -45,9 +48,14 @@ class LessonActivity : AppCompatActivity() {
     private var selectedOptionView: View? = null
     private var selectedOptionText: TextView? = null
     private var isAnswered = false
+    private lateinit var database: DatabaseReference
 
     // Hearts management
     private var heartsLeft = 5
+
+    // Streak management variables
+    private var currentStreak = 0
+    private lateinit var lastActivityDate: LocalDate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +63,7 @@ class LessonActivity : AppCompatActivity() {
 
         initializeUIComponents()
         initializeFirebase()
+        initializeStreakTracking()
         setupEventListeners()
 
         fetchQuestionsFromFirebase()
@@ -78,11 +87,77 @@ class LessonActivity : AppCompatActivity() {
     // Initialize Firebase
     private fun initializeFirebase() {
         auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().reference
         currentLevelId = intent.getStringExtra("levelId") ?: run {
             showErrorAndExit("Invalid level ID")
             return
         }
         currentLevel = "level$currentLevelId"
+    }
+
+    private fun initializeStreakTracking() {
+        val userId = auth.currentUser?.uid ?: return
+        val streakRef = database.child("users").child(userId).child("streak")
+
+        streakRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                currentStreak = dataSnapshot.child("currentStreak").getValue(Int::class.java) ?: 0
+                lastActivityDate = dataSnapshot.child("lastActivityDate").getValue(String::class.java)?.let {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        LocalDate.parse(it)
+                    } else {
+                        TODO("VERSION.SDK_INT < O")
+                    }
+                } ?: LocalDate.now()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                logAndToastError("Failed to load streak data", databaseError.toException())
+            }
+        })
+    }
+
+    private fun checkAndUpdateStreak() {
+        val today = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LocalDate.now()
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
+
+        when {
+            today.isEqual(lastActivityDate) -> {
+                // Same day, streak remains the same
+            }
+            today.isEqual(lastActivityDate.plusDays(1)) -> {
+                // Next day, increment streak
+                currentStreak++
+            }
+            else -> {
+                // More than a day passed, reset streak
+                currentStreak = 1
+            }
+        }
+
+        // Save streak data to Firebase
+        saveStreakData(today)
+    }
+
+    private fun saveStreakData(today: LocalDate) {
+        val userId = auth.currentUser?.uid ?: return
+        val streakRef = database.child("users").child(userId).child("streak")
+
+        val streakData = mapOf(
+            "currentStreak" to currentStreak,
+            "lastActivityDate" to today.toString()
+        )
+
+        streakRef.setValue(streakData)
+            .addOnSuccessListener {
+                Log.d("LessonActivity", "Streak data saved successfully.")
+            }
+            .addOnFailureListener { exception ->
+                logAndToastError("Failed to save streak data", exception)
+            }
     }
 
     // Set up event listeners for UI components
@@ -297,6 +372,7 @@ class LessonActivity : AppCompatActivity() {
     // Mark the current level as completed and unlock the next level
     private fun completeLevel() {
         updateLevelCompletion()
+        checkAndUpdateStreak()
         Toast.makeText(this@LessonActivity, "You've completed the lesson!", Toast.LENGTH_SHORT)
             .show()
         finish()
