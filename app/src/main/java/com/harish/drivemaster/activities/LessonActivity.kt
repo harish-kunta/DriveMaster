@@ -28,6 +28,7 @@ import com.harish.drivemaster.models.FirebaseConstants.Companion.CURRENT_STREAK_
 import com.harish.drivemaster.models.FirebaseConstants.Companion.HEARTS_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.LAST_ACTIVITY_DATE_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.LESSONS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.POINTS_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 import java.time.LocalDate
@@ -447,10 +448,10 @@ class LessonActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val userRef = FirebaseDatabase.getInstance().getReference(USERS_REF).child(userId)
 
-        userRef.child("points").addListenerForSingleValueEvent(object : ValueEventListener {
+        userRef.child(POINTS_REF).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val currentPoints = dataSnapshot.getValue(Int::class.java) ?: 0
-                userRef.child("points").setValue(currentPoints + points)
+                userRef.child(POINTS_REF).setValue(currentPoints + points)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -471,7 +472,7 @@ class LessonActivity : AppCompatActivity() {
 
     private fun updatePointsInDatabase() {
         val userId = auth.currentUser?.uid ?: return
-        val pointsRef = database.child(USERS_REF).child(userId).child("points")
+        val pointsRef = database.child(USERS_REF).child(userId).child(POINTS_REF)
 
         pointsRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {

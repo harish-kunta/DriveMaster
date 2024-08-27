@@ -9,5 +9,6 @@ class FirebaseConstants {
         const val LESSONS_REF = "lessons"
         const val CURRENT_STREAK_REF = "current_streak"
         const val LAST_ACTIVITY_DATE_REF = "last_activity_date"
+        const val POINTS_REF = "points"
     }
 }

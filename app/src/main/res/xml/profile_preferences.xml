@@ -5,49 +5,32 @@
         android:layout="@layout/custom_header_layout"
         android:selectable="false"
         android:title="Profile" />
-
-    <PreferenceCategory
-        android:key="preference_category"
-        android:layout="@layout/settings_category_title_layout"
-        android:title="Name">
-        <EditTextPreference
+        <com.harish.drivemaster.settings_fragments.CustomEditTextPreference
             android:defaultValue="Your Name"
             android:dialogTitle="Enter new name"
             android:inputType="textPersonName"
             android:key="change_name"
-            android:title="Change Name" />
-    </PreferenceCategory>
+            android:title="Name" />
 
-    <PreferenceCategory
-        android:key="preference_category"
-        android:layout="@layout/settings_category_title_layout"
-        android:title="Password">
-
-        <EditTextPreference
+        <com.harish.drivemaster.settings_fragments.CustomEditTextPreference
             android:defaultValue="Your password"
             android:dialogTitle="Enter new password"
             android:inputType="textPassword"
             android:key="change_password"
-            android:title="Change Password" />
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:key="preference_category"
-        android:layout="@layout/settings_category_title_layout"
-        android:title="Email">
+            android:title="Password" />
 
-        <EditTextPreference
+        <com.harish.drivemaster.settings_fragments.CustomEditTextPreference
             android:defaultValue="Your email"
             android:dialogTitle="Enter new email"
             android:inputType="textEmailAddress"
             android:key="change_email"
-            android:title="Change Email" />
+            android:title="Email" />
 
-    </PreferenceCategory>
 
-    <!--    <com.harish.drivemaster.settings_fragments.ButtonPreference-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:key="delete_account"-->
-    <!--        android:title="Delete Account" />-->
+<!--        <com.harish.drivemaster.settings_fragments.ButtonPreference-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:key="delete_account"-->
+<!--            android:title="Delete Account" />-->
 
 </PreferenceScreen>

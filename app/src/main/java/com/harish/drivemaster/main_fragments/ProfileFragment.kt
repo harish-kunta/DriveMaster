@@ -23,6 +23,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.SettingsActivity
+import com.harish.drivemaster.models.FirebaseConstants.Companion.CURRENT_STREAK_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.POINTS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 import de.hdodenhof.circleimageview.CircleImageView
 
@@ -165,8 +168,8 @@ class ProfileFragment : Fragment() {
                     userEmailTextView.text = userEmail ?: "user@example.com"
 
                     // Fetch and display streak
-                    val currentStreak = snapshot.child("streak").child("currentStreak").getValue(Int::class.java) ?: 0
-                    val currentXP = snapshot.child("points").getValue(Int::class.java) ?: 0
+                    val currentStreak = snapshot.child(STREAK_REF).child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
+                    val currentXP = snapshot.child(POINTS_REF).getValue(Int::class.java) ?: 0
                     streakValue.text = currentStreak.toString()
                     xpValue.text = currentXP.toString()
                 }
