@@ -14,6 +14,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -23,6 +25,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.SettingsActivity
+import com.harish.drivemaster.helpers.UserViewModel
 import com.harish.drivemaster.models.FirebaseConstants.Companion.CURRENT_STREAK_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.POINTS_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
@@ -36,6 +39,8 @@ class ProfileFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    private lateinit var userViewModel: UserViewModel
 
     // UI Components
     private lateinit var settingsIcon: ImageView
@@ -65,38 +70,60 @@ class ProfileFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_profile, container, false)
-        settingsIcon = v.findViewById(R.id.settingsIcon)
-        userNameTextView = v.findViewById(R.id.userName)
-        userEmailTextView = v.findViewById(R.id.userEmail)
-        profilePictureSection = v.findViewById(R.id.profilePictureSection)
-        profileImageView = v.findViewById(R.id.profileImageView)
-        editProfileImageButton = v.findViewById(R.id.editProfileImageButton)
-        streakValue = v.findViewById(R.id.streakValue)
-        xpValue = v.findViewById(R.id.xpValue)
+        initializeUIComponents(v)
+
+        setupViewModel()
+
+        return v;
+    }
+
+    private fun setupViewModel() {
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
+        userViewModel.userName.observe(viewLifecycleOwner, Observer { name ->
+            userNameTextView.text = name
+        })
+
+        userViewModel.userEmail.observe(viewLifecycleOwner, Observer { email ->
+            userEmailTextView.text = email
+        })
+
+        userViewModel.profileImageUrl.observe(viewLifecycleOwner, Observer { imageUrl ->
+            if (!imageUrl.isNullOrEmpty()) {
+                Glide.with(this@ProfileFragment)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.default_profile)
+                    .into(profileImageView)
+            }
+        })
+
+        userViewModel.streak.observe(viewLifecycleOwner, Observer { streak ->
+            streakValue.text = streak.toString()
+        })
+
+        userViewModel.xp.observe(viewLifecycleOwner, Observer { xp ->
+            xpValue.text = xp.toString()
+        })
+    }
+
+    private fun initializeUIComponents(view: View) {
+        settingsIcon = view.findViewById(R.id.settingsIcon)
+        userNameTextView = view.findViewById(R.id.userName)
+        userEmailTextView = view.findViewById(R.id.userEmail)
+        profilePictureSection = view.findViewById(R.id.profilePictureSection)
+        profileImageView = view.findViewById(R.id.profileImageView)
+        editProfileImageButton = view.findViewById(R.id.editProfileImageButton)
+        streakValue = view.findViewById(R.id.streakValue)
+        xpValue = view.findViewById(R.id.xpValue)
 
         settingsIcon.setOnClickListener {
             val settingIntent = Intent(activity, SettingsActivity::class.java)
             startActivity(settingIntent)
         }
 
-        profilePictureSection.setOnClickListener {
-            openGallery()
-        }
-
-        editProfileImageButton.setOnClickListener {
-            openGallery()
-        }
-
-        profileImageView.setOnClickListener {
-            openGallery()
-        }
-
-        // Load the existing profile image
-        loadProfileImage()
-
-        populateUserInfo()
-
-        return v;
+        profilePictureSection.setOnClickListener { openGallery() }
+        editProfileImageButton.setOnClickListener { openGallery() }
+        profileImageView.setOnClickListener { openGallery() }
     }
 
     private fun openGallery() {
@@ -121,66 +148,12 @@ class ProfileFragment : Fragment() {
             storageRef.putFile(it)
                 .addOnSuccessListener {
                     storageRef.downloadUrl.addOnSuccessListener { uri ->
-                        // Save image URL to Firebase Database
-                        database.child(USERS_REF).child(userId).child("profileImageUrl")
-                            .setValue(uri.toString())
+                        userViewModel.updateProfileImage(uri.toString())
                     }
                 }
                 .addOnFailureListener {
                     Toast.makeText(context, "Image upload failed", Toast.LENGTH_SHORT).show()
                 }
-        }
-    }
-
-    private fun loadProfileImage() {
-        val userId = auth.currentUser?.uid ?: return
-        database.child(USERS_REF).child(userId).child("profileImageUrl")
-            .addListenerForSingleValueEvent(object :
-                ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val profileImageUrl = snapshot.getValue(String::class.java)
-                    if (!profileImageUrl.isNullOrEmpty()) {
-                        Glide.with(this@ProfileFragment)
-                            .load(profileImageUrl)
-                            .placeholder(R.drawable.default_profile)
-                            .into(profileImageView)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(context, "Failed to load profile image", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            })
-    }
-
-    private fun populateUserInfo() {
-        val userId = auth.currentUser?.uid
-        if (userId != null) {
-            database.child(USERS_REF).child(userId).addListenerForSingleValueEvent(object :
-                ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val userName = snapshot.child("name").getValue(String::class.java)
-                    val userEmail = snapshot.child("email").getValue(String::class.java)
-
-                    // Set the values to the TextViews
-                    userNameTextView.text = userName ?: "User Name"
-                    userEmailTextView.text = userEmail ?: "user@example.com"
-
-                    // Fetch and display streak
-                    val currentStreak = snapshot.child(STREAK_REF).child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
-                    val currentXP = snapshot.child(POINTS_REF).getValue(Int::class.java) ?: 0
-                    streakValue.text = currentStreak.toString()
-                    xpValue.text = currentXP.toString()
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle database error
-                    Toast.makeText(context, "Failed to load user info", Toast.LENGTH_SHORT).show()
-                }
-            })
-        } else {
-            Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -11,29 +11,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.LessonActivity
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
-import com.harish.drivemaster.models.FirebaseConstants.Companion.COMPLETED_LEVELS_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.CURRENT_STREAK_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.HEARTS_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.LESSONS_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
+import com.harish.drivemaster.helpers.UserViewModel
 
 class LearnFragment : Fragment() {
-
-    private lateinit var auth: FirebaseAuth
-    private lateinit var lessonsDatabase: DatabaseReference
-    private lateinit var userDatabase: DatabaseReference
+    private lateinit var userViewModel: UserViewModel
     private lateinit var levelsContainer: RecyclerView
     private lateinit var streakValue: TextView
     private lateinit var heartsValue: TextView
@@ -64,12 +52,8 @@ class LearnFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_learn, container, false)
-        try {
-            initializeUIComponents(view)
-            initializeFirebaseAndLoadData()
-        } catch (e: Exception) {
-            logAndToastError("Error initializing fragment", e)
-        }
+        initializeUIComponents(view)
+        setupViewModel()
         return view
     }
 
@@ -79,142 +63,65 @@ class LearnFragment : Fragment() {
         heartsValue = view.findViewById(R.id.heartsValue)
     }
 
-    private fun initializeFirebaseAndLoadData() {
-        try {
-            auth = FirebaseAuth.getInstance()
-            lessonsDatabase = FirebaseDatabase.getInstance().reference.child(LESSONS_REF)
-            userDatabase = FirebaseDatabase.getInstance().reference.child(USERS_REF)
-            loadUserData()
-            loadLevels()
-        } catch (e: Exception) {
-            logAndToastError("Error initializing Firebase", e)
-        }
+    private fun setupViewModel() {
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
+        userViewModel.streak.observe(viewLifecycleOwner, Observer { streak ->
+            streakValue.text = streak.toString()
+        })
+
+        userViewModel.heartsLeft.observe(viewLifecycleOwner, Observer { heartsLeft ->
+            updateHeartsDisplay(heartsLeft)
+        })
+
+        userViewModel.completedLevels.observe(viewLifecycleOwner, Observer { completedLevels ->
+            loadLevels(completedLevels)
+        })
+
+        userViewModel.lastRegenTime.observe(viewLifecycleOwner, Observer { lastRegenTime ->
+            regenerateHeartsIfNeeded(lastRegenTime)
+        })
     }
 
-    private fun loadUserData() {
-        val userId = auth.currentUser?.uid ?: return
-        val userRef = userDatabase.child(userId)
+    private fun updateHeartsDisplay(heartsLeft: Int) {
+        heartsValue.text = heartsLeft.toString()
+    }
 
-        try {
-            userRef.child(STREAK_REF).addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val currentStreak =
-                        dataSnapshot.child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
-                    streakValue.text = currentStreak.toString()
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    logAndToastError("Failed to load streak data", databaseError.toException())
-                }
-            })
-
-            userRef.child(HEARTS_REF).addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    heartsLeft = dataSnapshot.child("heartsLeft").getValue(Int::class.java) ?: 0
-                    val lastRegenTime =
-                        dataSnapshot.child("lastRegenTime").getValue(Long::class.java)
-                            ?: System.currentTimeMillis()
-                    regenerateHeartsIfNeeded(lastRegenTime)
-                    updateHeartsDisplay()
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    logAndToastError("Failed to load hearts data", databaseError.toException())
-                }
-            })
-        } catch (e: Exception) {
-            logAndToastError("Error loading user data", e)
+    private fun loadLevels(completedLevels: Set<Int>) {
+        val levels = levelCategories.mapNotNull { (categoryName, levelRange) ->
+            val levelsInCategory = levelRange.filter { levelId ->
+                // Assuming you have a way to know if a level exists
+                true
+            }
+            if (levelsInCategory.isNotEmpty()) LevelCategory(
+                categoryName,
+                levelsInCategory
+            ) else null
         }
+        setupRecyclerView(levels, completedLevels)
     }
 
     private fun regenerateHeartsIfNeeded(lastRegenTime: Long) {
-        try {
-            val currentTime = System.currentTimeMillis()
-            val elapsedTime = currentTime - lastRegenTime
-            val hoursElapsed = elapsedTime / REGEN_INTERVAL_MS
+        val currentTime = System.currentTimeMillis()
+        val elapsedTime = currentTime - lastRegenTime
+        val hoursElapsed = elapsedTime / REGEN_INTERVAL_MS
 
-            if (hoursElapsed > 0 && heartsLeft < MAX_HEARTS) {
-                heartsLeft = minOf(heartsLeft + hoursElapsed.toInt(), MAX_HEARTS)
-                saveHeartsData(currentTime)
-            }
-        } catch (e: Exception) {
-            logAndToastError("Error regenerating hearts", e)
+        if (hoursElapsed > 0 && userViewModel.heartsLeft.value ?: 0 < MAX_HEARTS) {
+            val newHearts = minOf(userViewModel.heartsLeft.value ?: 0 + hoursElapsed.toInt(), MAX_HEARTS)
+            userViewModel.saveHeartsData(newHearts, currentTime)
         }
     }
 
-    private fun saveHeartsData(lastRegenTime: Long) {
-        val userId = auth.currentUser?.uid ?: return
-
-        try {
-            val heartsData = mapOf(
-                "heartsLeft" to heartsLeft,
-                "lastRegenTime" to lastRegenTime
-            )
-
-            userDatabase.child(userId).child(HEARTS_REF).setValue(heartsData)
-                .addOnSuccessListener {
-                    Log.d(LOG_TAG, "Hearts data saved successfully.")
-                }
-                .addOnFailureListener { exception ->
-                    logAndToastError("Failed to save hearts data", exception)
-                }
-        } catch (e: Exception) {
-            logAndToastError("Error saving hearts data", e)
-        }
-    }
-
-    private fun loadLevels() {
-        try {
-            lessonsDatabase.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    try {
-                        val levels = levelCategories.mapNotNull { (categoryName, levelRange) ->
-                            val levelsInCategory =
-                                levelRange.filter { snapshot.hasChild("level$it") }
-                            if (levelsInCategory.isNotEmpty()) LevelCategory(
-                                categoryName,
-                                levelsInCategory
-                            ) else null
-                        }
-                        listenForUserLevelUpdates(levels)
-                    } catch (e: Exception) {
-                        logAndToastError("Failed to parse levels", e)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    logAndToastError("Failed to load levels", error.toException())
-                }
+    private fun navigateToLessonActivity(levelId: Int) {
+        if (userViewModel.heartsLeft.value ?: 0 > 0) {
+            startActivity(Intent(context, LessonActivity::class.java).apply {
+                putExtra("levelId", levelId.toString())
             })
-        } catch (e: Exception) {
-            logAndToastError("Error loading levels", e)
+        } else {
+            showNoHeartsPopup()
         }
     }
 
-    private fun listenForUserLevelUpdates(levels: List<LevelCategory>) {
-        val userId = auth.currentUser?.uid ?: return
-
-        try {
-            userDatabase.child(userId).child(COMPLETED_LEVELS_REF)
-                .addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        try {
-                            val completedLevels =
-                                snapshot.children.mapNotNull { it.key?.toInt() }.toSet()
-                            setupRecyclerView(levels, completedLevels)
-                        } catch (e: Exception) {
-                            logAndToastError("Failed to parse completed levels", e)
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        logAndToastError("Failed to load user levels", error.toException())
-                    }
-                })
-        } catch (e: Exception) {
-            logAndToastError("Error listening for user level updates", e)
-        }
-    }
 
     private fun setupRecyclerView(levels: List<LevelCategory>, completedLevels: Set<Int>) {
         try {
@@ -230,20 +137,6 @@ class LearnFragment : Fragment() {
                 }
         } catch (e: Exception) {
             logAndToastError("Error setting up RecyclerView", e)
-        }
-    }
-
-    private fun navigateToLessonActivity(levelId: Int) {
-        try {
-            if (heartsLeft > 0) {
-                startActivity(Intent(context, LessonActivity::class.java).apply {
-                    putExtra("levelId", levelId.toString())
-                })
-            } else {
-                showNoHeartsPopup()
-            }
-        } catch (e: Exception) {
-            logAndToastError("Error navigating to lesson activity", e)
         }
     }
 

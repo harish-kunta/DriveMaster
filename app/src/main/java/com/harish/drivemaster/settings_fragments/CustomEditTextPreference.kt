@@ -1,20 +1,22 @@
 package com.harish.drivemaster.settings_fragments
 
 import android.content.Context
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.PreferenceViewHolder
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.harish.drivemaster.R
 
 class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTextPreference(context, attrs) {
 
     private lateinit var editText: EditText
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     init {
         // Set the layout resource to your custom layout
@@ -37,6 +39,12 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTex
                 if (callChangeListener(newValue)) {
                     sharedPreferences?.edit()?.putString(key, newValue)?.apply()
                     summary = newValue  // Optionally update the summary
+
+                    // Update Firebase based on the key
+                    when (key) {
+                        "change_name" -> updateFirebaseUsername(newValue)
+                        "change_password" -> updateFirebasePassword(newValue)
+                    }
                 }
                 editText.clearFocus()
 
@@ -48,12 +56,43 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTex
                 false
             }
         })
-
     }
 
     override fun onAttached() {
         super.onAttached()
         // Ensure the summary is updated with the saved value
         summary = sharedPreferences?.getString(key, "")
+    }
+
+    private fun updateFirebaseUsername(newUsername: String) {
+        val user = auth.currentUser
+        user?.let {
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName(newUsername)
+                .build()
+
+            it.updateProfile(profileUpdates)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(context, "Username updated successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to update username", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        }
+    }
+
+    private fun updateFirebasePassword(newPassword: String) {
+        val user = auth.currentUser
+        user?.let {
+            it.updatePassword(newPassword)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(context, "Password updated successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to update password", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        }
     }
 }
