@@ -27,6 +27,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val userDatabase: DatabaseReference = FirebaseDatabase.getInstance().reference.child(USERS_REF)
+
     private val _streak = MutableLiveData<Int>()
     private val _heartsLeft = MutableLiveData<Int>()
     private val _lastRegenTime = MutableLiveData<Long>()
@@ -55,11 +56,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                _userName.value = snapshot.child(NAME).getValue(String::class.java) ?: "User Name"
-                _userEmail.value = snapshot.child(EMAIL).getValue(String::class.java) ?: "user@example.com"
-                _profileImageUrl.value = snapshot.child(PROFILE_IMAGE_URL).getValue(String::class.java)
-                _streak.value = snapshot.child(STREAK_REF).child(CURRENT_STREAK_REF).getValue(Int::class.java) ?: 0
-                _xp.value = snapshot.child(POINTS_REF).getValue(Int::class.java) ?: 0
+                _userName.value = snapshot.getValue(NAME, "User Name")
+                _userEmail.value = snapshot.getValue(EMAIL, "user@example.com")
+                _profileImageUrl.value = snapshot.getValue(PROFILE_IMAGE_URL)
+                _streak.value = snapshot.getNestedValue(STREAK_REF, CURRENT_STREAK_REF, 0)
+                _xp.value = snapshot.getValue(POINTS_REF, 0)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -67,29 +68,38 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             }
         })
 
-        userRef.child(STREAK_REF).child(CURRENT_STREAK_REF).addValueEventListener(object : ValueEventListener {
+        listenForChanges(userRef.child(STREAK_REF).child(CURRENT_STREAK_REF), _streak, 0)
+        listenForChanges(userRef.child(HEARTS_REF).child(HEARTS_LEFT_REF), _heartsLeft, 0)
+        listenForChanges(userRef.child(HEARTS_REF).child(LAST_REGEN_TIME_REF), _lastRegenTime, System.currentTimeMillis())
+        listenForCompletedLevels(userRef.child(COMPLETED_LEVELS_REF))
+    }
+
+    private fun listenForChanges(ref: DatabaseReference, liveData: MutableLiveData<Int>, defaultValue: Int) {
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                _streak.value = dataSnapshot.getValue(Int::class.java) ?: 0
+                liveData.value = dataSnapshot.getValue(Int::class.java) ?: defaultValue
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                Log.e("UserViewModel", "Failed to load streak data", databaseError.toException())
+                Log.e("UserViewModel", "Failed to load data", databaseError.toException())
             }
         })
+    }
 
-        userRef.child(HEARTS_REF).addValueEventListener(object : ValueEventListener {
+    private fun listenForChanges(ref: DatabaseReference, liveData: MutableLiveData<Long>, defaultValue: Long) {
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                _heartsLeft.value = dataSnapshot.child(HEARTS_LEFT_REF).getValue(Int::class.java) ?: 0
-                _lastRegenTime.value = dataSnapshot.child(LAST_REGEN_TIME_REF).getValue(Long::class.java)
-                    ?: System.currentTimeMillis()
+                liveData.value = dataSnapshot.getValue(Long::class.java) ?: defaultValue
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                Log.e("UserViewModel", "Failed to load hearts data", databaseError.toException())
+                Log.e("UserViewModel", "Failed to load data", databaseError.toException())
             }
         })
+    }
 
-        userRef.child(COMPLETED_LEVELS_REF).addValueEventListener(object : ValueEventListener {
+    private fun listenForCompletedLevels(ref: DatabaseReference) {
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _completedLevels.value = snapshot.children.mapNotNull { it.key?.toInt() }.toSet()
             }
@@ -102,10 +112,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun saveHeartsData(heartsLeft: Int, lastRegenTime: Long) {
         val userId = auth.currentUser?.uid ?: return
-
         val heartsData = mapOf(
-            "heartsLeft" to heartsLeft,
-            "lastRegenTime" to lastRegenTime
+            HEARTS_LEFT_REF to heartsLeft,
+            LAST_REGEN_TIME_REF to lastRegenTime
         )
 
         userDatabase.child(userId).child(HEARTS_REF).setValue(heartsData)
@@ -128,5 +137,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 Log.e("UserViewModel", "Failed to update profile image URL", it)
             }
     }
+
+    private inline fun <reified T> DataSnapshot.getValue(key: String, defaultValue: T? = null): T? {
+        return this.child(key).getValue(T::class.java) ?: defaultValue
+    }
+
+    private inline fun <reified T> DataSnapshot.getNestedValue(parentKey: String, childKey: String, defaultValue: T): T {
+        return this.child(parentKey).child(childKey).getValue(T::class.java) ?: defaultValue
+    }
 }
+
 
