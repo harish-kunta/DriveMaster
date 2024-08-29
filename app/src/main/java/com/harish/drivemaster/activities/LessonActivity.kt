@@ -264,6 +264,8 @@ class LessonActivity : AppCompatActivity() {
             .child(currentLevel)
             .child("questions")
 
+        questionsRef.keepSynced(true)
+
         questionsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 questions.clear()

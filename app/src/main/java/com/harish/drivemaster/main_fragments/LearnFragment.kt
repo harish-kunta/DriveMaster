@@ -2,12 +2,10 @@ package com.harish.drivemaster.main_fragments
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -25,8 +23,6 @@ class LearnFragment : Fragment() {
     private lateinit var levelsContainer: RecyclerView
     private lateinit var streakValue: TextView
     private lateinit var heartsValue: TextView
-
-    private var heartsLeft: Int = 0
 
     private val levelCategories = listOf(
         LEVEL_BEGINNER to 1..3,
@@ -71,11 +67,11 @@ class LearnFragment : Fragment() {
         })
 
         userViewModel.heartsLeft.observe(viewLifecycleOwner, Observer { heartsLeft ->
-            updateHeartsDisplay(heartsLeft)
+            heartsValue.text = heartsLeft.toString()
         })
 
         userViewModel.completedLevels.observe(viewLifecycleOwner, Observer { completedLevels ->
-            loadLevels(completedLevels)
+            setupRecyclerView(completedLevels)
         })
 
         userViewModel.lastRegenTime.observe(viewLifecycleOwner, Observer { lastRegenTime ->
@@ -83,22 +79,20 @@ class LearnFragment : Fragment() {
         })
     }
 
-    private fun updateHeartsDisplay(heartsLeft: Int) {
-        heartsValue.text = heartsLeft.toString()
-    }
-
-    private fun loadLevels(completedLevels: Set<Int>) {
+    private fun setupRecyclerView(completedLevels: Set<Int>) {
+        levelsContainer.layoutManager = LinearLayoutManager(context)
         val levels = levelCategories.mapNotNull { (categoryName, levelRange) ->
-            val levelsInCategory = levelRange.filter { levelId ->
-                // Assuming you have a way to know if a level exists
-                true
-            }
-            if (levelsInCategory.isNotEmpty()) LevelCategory(
-                categoryName,
-                levelsInCategory
-            ) else null
+            val levelsInCategory = levelRange.toList()
+            if (levelsInCategory.isNotEmpty()) LevelCategory(categoryName, levelsInCategory) else null
         }
-        setupRecyclerView(levels, completedLevels)
+        val maxCompletedLevel = completedLevels.maxOrNull() ?: 0
+        levelsContainer.adapter = LevelCategoryAdapter(levels, completedLevels, maxCompletedLevel) { levelId ->
+            if (levelId <= maxCompletedLevel + 1) {
+                navigateToLessonActivity(levelId)
+            } else {
+                showLockedLevelPopup()
+            }
+        }
     }
 
     private fun regenerateHeartsIfNeeded(lastRegenTime: Long) {
@@ -106,7 +100,7 @@ class LearnFragment : Fragment() {
         val elapsedTime = currentTime - lastRegenTime
         val hoursElapsed = elapsedTime / REGEN_INTERVAL_MS
 
-        if (hoursElapsed > 0 && userViewModel.heartsLeft.value ?: 0 < MAX_HEARTS) {
+        if (hoursElapsed > 0 && (userViewModel.heartsLeft.value ?: 0) < MAX_HEARTS) {
             val newHearts = minOf(userViewModel.heartsLeft.value ?: 0 + hoursElapsed.toInt(), MAX_HEARTS)
             userViewModel.saveHeartsData(newHearts, currentTime)
         }
@@ -122,55 +116,20 @@ class LearnFragment : Fragment() {
         }
     }
 
-
-    private fun setupRecyclerView(levels: List<LevelCategory>, completedLevels: Set<Int>) {
-        try {
-            levelsContainer.layoutManager = LinearLayoutManager(context)
-            val maxCompletedLevel = completedLevels.maxOrNull() ?: 0
-            levelsContainer.adapter =
-                LevelCategoryAdapter(levels, completedLevels, maxCompletedLevel) { levelId ->
-                    if (levelId <= maxCompletedLevel + 1) {
-                        navigateToLessonActivity(levelId)
-                    } else {
-                        showLockedLevelPopup()
-                    }
-                }
-        } catch (e: Exception) {
-            logAndToastError("Error setting up RecyclerView", e)
-        }
-    }
-
-    private fun updateHeartsDisplay() {
-        heartsValue.text = heartsLeft.toString()
-    }
-
     private fun showNoHeartsPopup() {
-        try {
-            AlertDialog.Builder(requireContext())
-                .setTitle("No Hearts Left")
-                .setMessage("You don't have any hearts left to start a new lesson. Please wait or earn more hearts.")
-                .setPositiveButton("OK", null)
-                .show()
-        } catch (e: Exception) {
-            logAndToastError("Error showing no hearts popup", e)
-        }
+        AlertDialog.Builder(requireContext())
+            .setTitle("No Hearts Left")
+            .setMessage("You don't have any hearts left to start a new lesson. Please wait or earn more hearts.")
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     private fun showLockedLevelPopup() {
-        try {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Level Locked")
-                .setMessage("You need to complete the previous level to unlock this one.")
-                .setPositiveButton("OK", null)
-                .show()
-        } catch (e: Exception) {
-            logAndToastError("Error showing locked level popup", e)
-        }
-    }
-
-    private fun logAndToastError(message: String, exception: Exception) {
-        Log.e(LOG_TAG, message, exception)
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        AlertDialog.Builder(requireContext())
+            .setTitle("Level Locked")
+            .setMessage("You need to complete the previous level to unlock this one.")
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     data class LevelCategory(val category: String, val levels: List<Int>)
@@ -189,8 +148,7 @@ class LearnFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: LevelCategoryViewHolder, position: Int) {
-            val category = categories[position]
-            holder.bind(category, completedLevels, maxCompletedLevel, onLevelSelected)
+            holder.bind(categories[position], completedLevels, maxCompletedLevel, onLevelSelected)
         }
 
         override fun getItemCount(): Int = categories.size
@@ -233,8 +191,7 @@ class LearnFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: LevelViewHolder, position: Int) {
-            val levelId = levels[position]
-            holder.bind(levelId, completedLevels, maxCompletedLevel, onLevelSelected)
+            holder.bind(levels[position], completedLevels, maxCompletedLevel, onLevelSelected)
         }
 
         override fun getItemCount(): Int = levels.size
@@ -254,31 +211,15 @@ class LearnFragment : Fragment() {
 
                 val context = itemView.context
 
-                when {
-                    levelId in completedLevels -> itemView.setBackgroundColor(
-                        ContextCompat.getColor(
-                            context,
-                            R.color.completedLevelColor
-                        )
-                    )
-
-                    levelId == maxCompletedLevel + 1 -> itemView.setBackgroundColor(
-                        ContextCompat.getColor(
-                            context,
-                            R.color.nextLevelColor
-                        )
-                    )
-
-                    else -> itemView.setBackgroundColor(
-                        ContextCompat.getColor(
-                            context,
-                            R.color.lockedLevelColor
-                        )
-                    )
+                val backgroundColorRes = when {
+                    levelId in completedLevels -> R.color.completedLevelColor
+                    levelId == maxCompletedLevel + 1 -> R.color.nextLevelColor
+                    else -> R.color.lockedLevelColor
                 }
 
+                itemView.setBackgroundColor(ContextCompat.getColor(context, backgroundColorRes))
+
                 itemView.setOnClickListener {
-                    // Perform haptic feedback
                     HapticFeedbackUtil.performHapticFeedback(context)
                     onLevelSelected(levelId)
                 }

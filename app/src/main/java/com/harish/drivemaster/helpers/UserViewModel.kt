@@ -26,7 +26,8 @@ import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val userDatabase: DatabaseReference = FirebaseDatabase.getInstance().reference.child(USERS_REF)
+    private val userDatabase: DatabaseReference =
+        FirebaseDatabase.getInstance().reference.child(USERS_REF)
 
     private val _streak = MutableLiveData<Int>()
     private val _heartsLeft = MutableLiveData<Int>()
@@ -46,13 +47,18 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     val userEmail: LiveData<String> = _userEmail
     val xp: LiveData<Int> = _xp
 
+    private var dataLoaded = false
+
+    fun isDataLoaded(): Boolean = dataLoaded
+
     init {
         loadUserData()
     }
 
-    private fun loadUserData() {
+    fun loadUserData() {
         val userId = auth.currentUser?.uid ?: return
         val userRef = userDatabase.child(userId)
+        userRef.keepSynced(true)
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -70,11 +76,19 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
         listenForChanges(userRef.child(STREAK_REF).child(CURRENT_STREAK_REF), _streak, 0)
         listenForChanges(userRef.child(HEARTS_REF).child(HEARTS_LEFT_REF), _heartsLeft, 0)
-        listenForChanges(userRef.child(HEARTS_REF).child(LAST_REGEN_TIME_REF), _lastRegenTime, System.currentTimeMillis())
+        listenForChanges(
+            userRef.child(HEARTS_REF).child(LAST_REGEN_TIME_REF),
+            _lastRegenTime,
+            System.currentTimeMillis()
+        )
         listenForCompletedLevels(userRef.child(COMPLETED_LEVELS_REF))
     }
 
-    private fun listenForChanges(ref: DatabaseReference, liveData: MutableLiveData<Int>, defaultValue: Int) {
+    private fun listenForChanges(
+        ref: DatabaseReference,
+        liveData: MutableLiveData<Int>,
+        defaultValue: Int
+    ) {
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 liveData.value = dataSnapshot.getValue(Int::class.java) ?: defaultValue
@@ -86,7 +100,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    private fun listenForChanges(ref: DatabaseReference, liveData: MutableLiveData<Long>, defaultValue: Long) {
+    private fun listenForChanges(
+        ref: DatabaseReference,
+        liveData: MutableLiveData<Long>,
+        defaultValue: Long
+    ) {
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 liveData.value = dataSnapshot.getValue(Long::class.java) ?: defaultValue
@@ -142,7 +160,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         return this.child(key).getValue(T::class.java) ?: defaultValue
     }
 
-    private inline fun <reified T> DataSnapshot.getNestedValue(parentKey: String, childKey: String, defaultValue: T): T {
+    private inline fun <reified T> DataSnapshot.getNestedValue(
+        parentKey: String,
+        childKey: String,
+        defaultValue: T
+    ): T {
         return this.child(parentKey).child(childKey).getValue(T::class.java) ?: defaultValue
     }
 }

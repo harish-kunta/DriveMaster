@@ -17,19 +17,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.SettingsActivity
 import com.harish.drivemaster.helpers.UserViewModel
-import com.harish.drivemaster.models.FirebaseConstants.Companion.CURRENT_STREAK_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.POINTS_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
-import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 import de.hdodenhof.circleimageview.CircleImageView
 
 private const val ARG_PARAM1 = "param1"
@@ -92,8 +86,12 @@ class ProfileFragment : Fragment() {
             if (!imageUrl.isNullOrEmpty()) {
                 Glide.with(this@ProfileFragment)
                     .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL) // Enable disk caching
                     .placeholder(R.drawable.default_profile)
                     .into(profileImageView)
+            } else {
+                // Handle case where imageUrl is empty or null
+                profileImageView.setImageResource(R.drawable.default_profile)
             }
         })
 
@@ -104,6 +102,11 @@ class ProfileFragment : Fragment() {
         userViewModel.xp.observe(viewLifecycleOwner, Observer { xp ->
             xpValue.text = xp.toString()
         })
+
+        // Only fetch data if it hasn't been loaded yet
+        if (userViewModel.isDataLoaded().not()) {
+            userViewModel.loadUserData() // Fetch data from Firebase
+        }
     }
 
     private fun initializeUIComponents(view: View) {
@@ -155,16 +158,5 @@ class ProfileFragment : Fragment() {
                     Toast.makeText(context, "Image upload failed", Toast.LENGTH_SHORT).show()
                 }
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ProfileFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
     }
 }
