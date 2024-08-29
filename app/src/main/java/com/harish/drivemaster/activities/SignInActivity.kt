@@ -2,6 +2,7 @@ package com.harish.drivemaster.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -14,7 +15,10 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.harish.drivemaster.R
+import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
 
 class SignInActivity : AppCompatActivity() {
 
@@ -25,6 +29,7 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var userPassword: TextInputEditText
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: FirebaseDatabase
     private val RC_SIGN_IN = 9001
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +41,8 @@ class SignInActivity : AppCompatActivity() {
         tvForgotPassword = findViewById(R.id.tvForgotPassword)
         userEmailAddress = findViewById(R.id.email_field)
         userPassword = findViewById(R.id.password_field)
+
+        database = FirebaseDatabase.getInstance()
 
         auth = FirebaseAuth.getInstance()
 
@@ -111,12 +118,25 @@ class SignInActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    retrieveFcmToken()
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
                     Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    fun retrieveFcmToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                Log.d("MainActivity", "FCM Token: $token")
+                saveFcmToken(token)  // Save the token to your database
+            } else {
+                Log.e("MainActivity", "Fetching FCM token failed", task.exception)
+            }
+        }
     }
 
     private fun signUp() {
@@ -140,6 +160,19 @@ class SignInActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, "Failed to send reset email.", Toast.LENGTH_SHORT).show()
                 }
+            }
+    }
+
+    private fun saveFcmToken(token: String) {
+        val userId = auth.currentUser?.uid ?: return
+        val tokenRef = database.getReference(USERS_REF).child(userId).child("fcmToken")
+
+        tokenRef.setValue(token)
+            .addOnSuccessListener {
+                Log.d("MainActivity", "FCM token saved successfully.")
+            }
+            .addOnFailureListener { exception ->
+                Log.d("MainActivity", "Failed to save FCM token: ${exception.message}")
             }
     }
 }

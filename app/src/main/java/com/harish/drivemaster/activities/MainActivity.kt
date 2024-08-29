@@ -9,6 +9,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.harish.drivemaster.R
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
+import com.harish.drivemaster.main_fragments.LearnFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +31,14 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setupWithNavController(navController)
+
+        val notificationType = intent.getStringExtra("notification_type")
+        if (notificationType == "streak_reminder") {
+            // Navigate to the lesson screen
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment, LearnFragment())
+                .commit()
+        }
 
         // Set up haptic feedback on navigation item selection
         bottomNav.setOnItemSelectedListener { item ->
