@@ -11,9 +11,11 @@ import androidx.preference.EditTextPreference
 import androidx.preference.PreferenceViewHolder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.database.FirebaseDatabase
 import com.harish.drivemaster.R
 
-class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTextPreference(context, attrs) {
+class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
+    EditTextPreference(context, attrs) {
 
     private lateinit var editText: EditText
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -49,7 +51,8 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTex
                 editText.clearFocus()
 
                 // Hide the keyboard
-                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm =
+                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(editText.windowToken, 0)
                 true
             } else {
@@ -74,9 +77,29 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTex
             it.updateProfile(profileUpdates)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(context, "Username updated successfully", Toast.LENGTH_SHORT).show()
+
+                        // update the username in the Firebase database
+                        val database = FirebaseDatabase.getInstance()
+                        val userRef = database.getReference("users").child(user.uid)
+                        userRef.child("name").setValue(newUsername)
+                            .addOnCompleteListener { dbTask ->
+                                if (dbTask.isSuccessful) {
+                                    Toast.makeText(
+                                        context,
+                                        "Username updated successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to update username in database",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                     } else {
-                        Toast.makeText(context, "Failed to update username", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Failed to update username", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
         }
@@ -86,12 +109,13 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) : EditTex
         val user = auth.currentUser
         user?.let {
             it.updatePassword(newPassword)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(context, "Password updated successfully", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed to update password", Toast.LENGTH_SHORT).show()
-                    }
+                .addOnSuccessListener { task ->
+                    Toast.makeText(context, "Password updated successfully", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "Failed to update password", Toast.LENGTH_SHORT)
+                        .show()
                 }
         }
     }

@@ -19,13 +19,6 @@
             android:key="change_password"
             android:title="Password" />
 
-        <com.harish.drivemaster.settings_fragments.CustomEditTextPreference
-            android:defaultValue="Your email"
-            android:dialogTitle="Enter new email"
-            android:inputType="textEmailAddress"
-            android:key="change_email"
-            android:title="Email" />
-
 
 <!--        <com.harish.drivemaster.settings_fragments.ButtonPreference-->
 <!--            android:layout_width="match_parent"-->
