@@ -60,6 +60,36 @@
         <item name="android:singleLine">true</item>
     </style>
 
+    <style name="StreakIncreasedPageTitle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">120sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/streakTextColor</item>
+    </style>
+
+    <style name="StreakIncreasedPageSubTitle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/streakTextColor</item>
+    </style>
+
+    <style name="StreakIncreasedPageWarningStyle" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/nunito_semibold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textColor">@color/textColorSecondary</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+    </style>
+
     <style name="GreenButton" parent="Widget.AppCompat.Button">
         <item name="android:fontFamily">@font/nunito_extrabold</item>
         <item name="android:textSize">12sp</item>

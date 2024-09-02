@@ -18,7 +18,7 @@ import java.time.LocalDate
 
 class StreakIncreasedActivity : AppCompatActivity() {
 
-    private lateinit var tvStreakMessage: TextView
+    private lateinit var tvCurrentStreak: TextView
     private lateinit var btnContinue: Button
     private var currentStreak = 0
     private lateinit var database: DatabaseReference
@@ -29,7 +29,8 @@ class StreakIncreasedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_streak_increased)
 
-        tvStreakMessage = findViewById(R.id.tvStreakMessage)
+        tvCurrentStreak = findViewById(R.id.tvCurrentStreak)
+
         btnContinue = findViewById(R.id.btnContinue)
 
         auth = FirebaseAuth.getInstance()
@@ -43,9 +44,13 @@ class StreakIncreasedActivity : AppCompatActivity() {
         }
         lastActivityDate = today
 
-        tvStreakMessage.text = "Current streak: $currentStreak days"
+        tvCurrentStreak.text = currentStreak.toString()
 
         saveStreakData()
+
+        btnContinue.setOnClickListener {
+            finish()
+        }
     }
 
     private fun saveStreakData() {
@@ -60,7 +65,6 @@ class StreakIncreasedActivity : AppCompatActivity() {
         streakRef.setValue(streakData)
             .addOnSuccessListener {
                 Log.d("StreakIncreasedActivity", "Streak data saved successfully.")
-                finish()
             }
             .addOnFailureListener { exception ->
                 Log.e("StreakIncreasedActivity", "Failed to save streak data", exception)

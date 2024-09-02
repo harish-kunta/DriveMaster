@@ -1,34 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/tvStreakMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Your streak has increased today!"
-        android:textSize="20sp"
-        android:textColor="@color/textColorPrimary"
-        android:layout_marginBottom="16dp"/>
-
-    <TextView
-        android:id="@+id/tvCurrentStreak"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Streak: 0"
-        android:textSize="24sp"
-        android:textColor="@color/textColorPrimary"
-        android:layout_marginBottom="32dp"/>
-
-    <Button
-        android:id="@+id/btnContinue"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Continue"
-        android:textColor="@android:color/white"/>
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="64dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvCurrentStreak"
+                style="@style/StreakIncreasedPageTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1" />
+
+            <TextView
+                android:id="@+id/tvStreakMessage"
+                style="@style/StreakIncreasedPageSubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="day streak!" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/profile_page_block_background"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:weightSum="2">
+
+                <TextView
+                    style="@style/StreakIncreasedPageWarningStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Practise each day so your streak won't reset!" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnContinue"
+            style="@style/GreenButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Continue" />
+    </LinearLayout>
+
+
 </LinearLayout>

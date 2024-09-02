@@ -28,6 +28,10 @@
     <color name="greenCardBorderColor">#77C93C</color>
 
 
+    <!-- Streak page colors -->
+    <color name="streakTextColor">#FF9600</color>
+
+
     <!-- Border and shadow colors -->
     <color name="borderColor">#E0E0E0</color> <!-- Light Gray border -->
     <color name="shadowColor">#757575</color> <!-- Shadow color -->

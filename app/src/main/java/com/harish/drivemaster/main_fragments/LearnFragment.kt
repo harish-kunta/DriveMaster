@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.LessonActivity
+import com.harish.drivemaster.activities.StreakIncreasedActivity
 import com.harish.drivemaster.helpers.HapticFeedbackUtil
 import com.harish.drivemaster.helpers.UserViewModel
 
@@ -114,6 +115,9 @@ class LearnFragment : Fragment() {
         } else {
             showNoHeartsPopup()
         }
+//        startActivity(Intent(context, StreakIncreasedActivity::class.java).apply {
+//            putExtra("levelId", levelId.toString())
+//        })
     }
 
     private fun showNoHeartsPopup() {
