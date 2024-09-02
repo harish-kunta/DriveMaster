@@ -1,5 +1,6 @@
 package com.harish.drivemaster.activities
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -62,6 +63,8 @@ class LessonActivity : AppCompatActivity() {
 
     // Data & State Management
     private var accumulatedPoints = 0
+    private var startTime: Long = 0L
+    private var correctAnswersCount: Int = 0
 
     // Hearts management
     private var heartsLeft = 0
@@ -73,6 +76,8 @@ class LessonActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lesson)
+
+        startTime = System.currentTimeMillis() // Record the start time
 
         initializeUIComponents()
         initializeFirebase()
@@ -345,6 +350,7 @@ class LessonActivity : AppCompatActivity() {
         showAnswerPopup(isCorrect)
         if (isCorrect) {
             SoundUtil.getInstance(this).playSuccessSound()
+            correctAnswersCount++
             accumulatedPoints += 10  // Accumulate points locally
         } else {
             SoundUtil.getInstance(this).playFailureSound()
@@ -467,8 +473,20 @@ class LessonActivity : AppCompatActivity() {
         updatePointsInDatabase()
         updateLevelCompletion()
         checkAndUpdateStreak()
-        Toast.makeText(this@LessonActivity, "You've completed the lesson!", Toast.LENGTH_SHORT)
-            .show()
+
+        val endTime = System.currentTimeMillis()
+        val timeTaken = endTime - startTime // Calculate time taken
+
+        val percentageCorrect = (correctAnswersCount.toDouble() / questions.size) * 100 // Calculate percentage of correct answers
+
+        // Pass data to LessonCompleteActivity
+        val intent = Intent(this, LessonCompleteActivity::class.java).apply {
+            putExtra("totalPoints", accumulatedPoints)
+            putExtra("timeTaken", timeTaken)
+            putExtra("percentageCorrect", percentageCorrect)
+        }
+        startActivity(intent)
+
         finish()
     }
 

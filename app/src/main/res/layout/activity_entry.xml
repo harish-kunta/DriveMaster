@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="0.5"
-            style="@style/GreenButton"
+            style="@style/WhiteButton"
             android:text="I Already have an account" />
 
     </LinearLayout>

@@ -83,7 +83,7 @@ class NotificationsActivity : AppCompatActivity() {
         }
 
         // After ensuring the notification channel is created, proceed to SignIn
-        startActivity(Intent(this, SignInActivity::class.java))
+        startActivity(Intent(this, MainActivity::class.java))
         finish()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

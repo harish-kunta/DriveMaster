@@ -22,6 +22,11 @@
     <color name="whiteButtonColor">#FFFFFF</color> <!-- Green Button -->
     <color name="whiteButtonTextColor">#58CC02</color> <!-- White text on buttons -->
 
+    <!-- Lesson complete page colors -->
+    <color name="yellowCardBorderColor">#F7CA45</color>
+    <color name="blueCardBorderColor">#53ADF0</color>
+    <color name="greenCardBorderColor">#77C93C</color>
+
 
     <!-- Border and shadow colors -->
     <color name="borderColor">#E0E0E0</color> <!-- Light Gray border -->

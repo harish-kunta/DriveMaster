@@ -1,12 +1,16 @@
 package com.harish.drivemaster.activities
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -88,7 +92,8 @@ class SignInActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                Toast.makeText(this, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -101,7 +106,8 @@ class SignInActivity : AppCompatActivity() {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
     }
@@ -119,8 +125,18 @@ class SignInActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     retrieveFcmToken()
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    if (areNotificationsGranted()) {
+                        // If notifications are already granted, proceed directly to SignInActivity
+                        val signInIntent = Intent(this, MainActivity::class.java)
+                        startActivity(signInIntent)
+                        finish()
+                    } else {
+                        // Otherwise, open the NotificationsActivity
+                        val notificationIntent = Intent(this, NotificationsActivity::class.java)
+                        startActivity(notificationIntent)
+                        finish()
+                    }
+
                 } else {
                     Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show()
                 }
@@ -174,6 +190,16 @@ class SignInActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 Log.d("MainActivity", "Failed to save FCM token: ${exception.message}")
             }
+    }
+
+    private fun areNotificationsGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            NotificationManagerCompat.from(this).areNotificationsEnabled()
+        }
     }
 }
 

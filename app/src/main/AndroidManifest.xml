@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".DriveMaster"
@@ -19,6 +19,11 @@
         android:theme="@style/Theme.DriveMaster"
         tools:targetApi="31">
         <activity
+            android:name=".activities.LessonCompleteActivity"
+            android:exported="false"
+            android:label="@string/title_activity_lesson_complete"
+            android:theme="@style/Theme.DriveMaster" />
+        <activity
             android:name=".activities.SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings" />
@@ -31,15 +36,12 @@
             android:exported="false"
             android:label="@string/profile_toggle_preferences" />
         <activity
-            android:name=".activities.WelcomeActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.NotificationsActivity"
             android:exported="false" />
         <activity
             android:name=".activities.EntryActivity"
             android:exported="true"
-            android:theme="@style/Theme.DriveMaster"/>
+            android:theme="@style/Theme.DriveMaster" />
         <activity
             android:name=".activities.SignUpActivity"
             android:exported="false"
@@ -61,6 +63,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.LessonActivity" />
+
         <service
             android:name=".helpers.MyFirebaseMessagingService"
             android:exported="true">
