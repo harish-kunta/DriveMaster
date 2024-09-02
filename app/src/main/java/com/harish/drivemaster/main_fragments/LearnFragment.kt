@@ -210,7 +210,7 @@ class LearnFragment : Fragment() {
                 maxCompletedLevel: Int,
                 onLevelSelected: (Int) -> Unit
             ) {
-                levelButton.text = "Level $levelId"
+                levelButton.text = "Level"
                 levelNumber.text = levelId.toString()
 
                 val context = itemView.context

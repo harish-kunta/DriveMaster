@@ -16,8 +16,7 @@
         android:layout_weight="0.3"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp">
-    </LinearLayout>
+        android:padding="16dp"></LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,11 +28,11 @@
         android:padding="16dp">
 
         <TextView
+            style="@style/EntryPageTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Drive Master"
-            style="@style/EntryPageTitle" />
+            android:text="Drive Master" />
 
         <ImageView
             android:layout_width="match_parent"
@@ -43,13 +42,11 @@
             android:src="@drawable/drive_master_logo" />
 
         <TextView
+            style="@style/EntryPageSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
-            android:gravity="center"
-            android:text="The free, fun and easy way to practise for driving test"
-            style="@style/EntryPageSubtitle"
-            />
+            android:text="The free, fun and easy way to practise for driving test" />
     </LinearLayout>
 
     <LinearLayout
@@ -62,20 +59,20 @@
 
         <Button
             android:id="@+id/btnGetStarted"
+            style="@style/GreenButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="0.5"
-            style="@style/GreenButton"
             android:text="Get Started" />
 
         <Button
             android:id="@+id/btnSignIn"
+            style="@style/WhiteButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="0.5"
-            style="@style/WhiteButton"
             android:text="I Already have an account" />
 
     </LinearLayout>

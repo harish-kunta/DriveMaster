@@ -18,6 +18,6 @@ class SplashActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             // Close this activity
             finish()
-        }, 3000) // 3000 ms = 3 seconds
+        }, 1000) // 3000 ms = 3 seconds
     }
 }

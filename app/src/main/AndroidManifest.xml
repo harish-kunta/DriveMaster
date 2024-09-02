@@ -19,6 +19,11 @@
         android:theme="@style/Theme.DriveMaster"
         tools:targetApi="31">
         <activity
+            android:name=".activities.WelcomeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_welcome"
+            android:theme="@style/Theme.DriveMaster" />
+        <activity
             android:name=".activities.LessonCompleteActivity"
             android:exported="false"
             android:label="@string/title_activity_lesson_complete"
@@ -57,16 +62,20 @@
             android:exported="false"
             android:label="@string/title_activity_sign_in"
             android:theme="@style/Theme.DriveMaster" />
+
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".activities.SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.DriveMaster">
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DriveMaster"/>
         <activity android:name=".activities.LessonActivity" />
 
         <service

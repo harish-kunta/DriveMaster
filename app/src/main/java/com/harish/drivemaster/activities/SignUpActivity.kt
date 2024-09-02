@@ -81,7 +81,8 @@ class SignUpActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                Toast.makeText(this, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -94,7 +95,8 @@ class SignUpActivity : AppCompatActivity() {
                     val user = auth.currentUser
                     saveUserToDatabase(user)
                 } else {
-                    Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
     }
@@ -103,9 +105,10 @@ class SignUpActivity : AppCompatActivity() {
         user?.let {
             val userId = it.uid
             val userRef = database.getReference("users/$userId")
+            val username = userName.text.toString()
 
             val userData = mapOf(
-                "name" to (userName.text.toString().takeIf { it.isNotEmpty() } ?: user.displayName),
+                "name" to (username.takeIf { it.isNotEmpty() } ?: user.displayName),
                 "email" to user.email,
                 // Initialize other fields as necessary
             )
@@ -113,7 +116,7 @@ class SignUpActivity : AppCompatActivity() {
             userRef.setValue(userData).addOnCompleteListener { dbTask ->
                 if (dbTask.isSuccessful) {
                     Toast.makeText(this, "Sign-up successful!", Toast.LENGTH_SHORT).show()
-                    openSignInPage()
+                    openWelcomePage(username)
                 } else {
                     Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show()
                 }
@@ -144,6 +147,14 @@ class SignUpActivity : AppCompatActivity() {
     // open sign in page
     fun openSignInPage() {
         val intent = Intent(this, SignInActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    // open welcome page
+    fun openWelcomePage(name: String) {
+        val intent = Intent(this, WelcomeActivity::class.java)
+        intent.putExtra("name", name)
         startActivity(intent)
         finish()
     }
