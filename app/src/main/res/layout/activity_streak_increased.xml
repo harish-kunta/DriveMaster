@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tvStreakMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your streak has increased today!"
+        android:textSize="20sp"
+        android:textColor="@color/textColorPrimary"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tvCurrentStreak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current Streak: 0"
+        android:textSize="24sp"
+        android:textColor="@color/textColorPrimary"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/btnContinue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:textColor="@android:color/white"/>
+</LinearLayout>

@@ -127,7 +127,7 @@
             <GridLayout
                 android:id="@+id/profileGridLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:columnCount="2"
                 android:orientation="horizontal"
                 android:rowCount="2">
@@ -135,17 +135,19 @@
                 <!-- Custom Tile 1 -->
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_rowWeight="1"
                     android:layout_columnWeight="1"
                     android:layout_marginRight="4dp"
                     android:background="@drawable/profile_page_block_background"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:weightSum="2">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -154,26 +156,19 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_fire_icon" />
 
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/streakValue"
+                            style="@style/ProfilePageUserNameStyle"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/streakValue"
-                                style="@style/ProfilePageUserNameStyle"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:text="0"
-                                android:textAppearance="?attr/textAppearanceListItem" />
-                        </LinearLayout>
+                            android:text="0"
+                            android:textAppearance="?attr/textAppearanceListItem" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:orientation="horizontal">
 
                         <View
@@ -194,7 +189,7 @@
                 <!-- Custom Tile 2 -->
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_rowWeight="1"
                     android:layout_columnWeight="1"
                     android:layout_marginLeft="4dp"
@@ -213,23 +208,13 @@
                             android:layout_gravity="center"
                             android:src="@drawable/icon_flash" />
 
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/xpValue"
+                            style="@style/ProfilePageUserNameStyle"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/xpValue"
-                                style="@style/ProfilePageUserNameStyle"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:text="0"
-                                android:textAppearance="?attr/textAppearanceListItem" />
-
-
-                        </LinearLayout>
+                            android:text="0"
+                            android:textAppearance="?attr/textAppearanceListItem" />
                     </LinearLayout>
 
                     <LinearLayout

@@ -59,6 +59,8 @@ class LessonActivity : AppCompatActivity() {
     private var selectedOptionView: View? = null
     private var selectedOptionText: TextView? = null
     private var isAnswered = false
+    private var streakIncreasedToday = false
+
     private lateinit var database: DatabaseReference
 
     // Data & State Management
@@ -199,41 +201,22 @@ class LessonActivity : AppCompatActivity() {
         }
 
         when {
-            today.isEqual(lastActivityDate) -> {
+            today.isEqual(lastActivityDate) && currentStreak > 0 -> {
                 // Same day, streak remains the same
             }
 
             today.isEqual(lastActivityDate.plusDays(1)) -> {
                 // Next day, increment streak
                 currentStreak++
+                streakIncreasedToday = true
             }
 
             else -> {
                 // More than a day passed, reset streak
                 currentStreak = 1
+                streakIncreasedToday = true
             }
         }
-
-        // Save streak data to Firebase
-        saveStreakData(today)
-    }
-
-    private fun saveStreakData(today: LocalDate) {
-        val userId = auth.currentUser?.uid ?: return
-        val streakRef = database.child(USERS_REF).child(userId).child(STREAK_REF)
-
-        val streakData = mapOf(
-            CURRENT_STREAK_REF to currentStreak,
-            LAST_ACTIVITY_DATE_REF to today.toString()
-        )
-
-        streakRef.setValue(streakData)
-            .addOnSuccessListener {
-                Log.d("LessonActivity", "Streak data saved successfully.")
-            }
-            .addOnFailureListener { exception ->
-                logAndToastError("Failed to save streak data", exception)
-            }
     }
 
     // Set up event listeners for UI components
@@ -484,6 +467,8 @@ class LessonActivity : AppCompatActivity() {
             putExtra("totalPoints", accumulatedPoints)
             putExtra("timeTaken", timeTaken)
             putExtra("percentageCorrect", percentageCorrect)
+            putExtra("currentStreak", currentStreak)
+            putExtra("streakIncreasedToday", streakIncreasedToday)
         }
         startActivity(intent)
 
