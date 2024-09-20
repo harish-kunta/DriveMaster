@@ -16,12 +16,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.FirebaseDatabase
 import com.harish.drivemaster.R
+import com.harish.drivemaster.helpers.FirebasePreferences
 
 class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
     EditTextPreference(context, attrs) {
 
     private lateinit var editText: EditText
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var firebasePreferences: FirebasePreferences
 
     init {
         // Set the layout resource to your custom layout
@@ -42,12 +44,20 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
                 // Save the new value to SharedPreferences when "Done" is pressed
                 val newValue = editText.text.toString()
                 if (callChangeListener(newValue)) {
-                    sharedPreferences?.edit()?.putString(key, newValue)?.apply()
                     summary = newValue  // Optionally update the summary
-
                     // Update Firebase based on the key
                     when (key) {
-                        "change_name" -> updateFirebaseUsername(newValue)
+                        "change_name" -> {
+                            // Save the new value to Firebase
+                            firebasePreferences.setPreference(key, newValue) { success ->
+                                if (success) {
+                                    summary = newValue  // Update the summary
+                                    Toast.makeText(context, "Preference updated", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Failed to update preference", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                         "change_password" -> promptForOldPasswordAndReauthenticate(newValue)
                     }
                 }
@@ -66,8 +76,43 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
 
     override fun onAttached() {
         super.onAttached()
-        // Ensure the summary is updated with the saved value
-        summary = sharedPreferences?.getString(key, "")
+        val user = auth.currentUser
+        if (user != null) {
+            // Initialize FirebasePreferences with the user's ID
+            firebasePreferences = FirebasePreferences(user.uid)
+
+            // Fetch the preference value from Firebase
+            firebasePreferences.getPreference(key) { value ->
+                value?.let {
+                    text = it
+                    summary = it
+                }
+            }
+        } else {
+            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateFirebasePreference(key: String, value: String) {
+        val user = auth.currentUser
+        if (user != null) {
+            // Get a reference to the Firebase Realtime Database
+            val database = FirebaseDatabase.getInstance()
+            val userPreferencesRef = database.getReference("users").child(user.uid).child("preferences")
+
+            // Update the specific preference by key
+            userPreferencesRef.child(key).setValue(value)
+                .addOnSuccessListener {
+                    // Successfully updated preference in Firebase
+                    Toast.makeText(context, "$key updated in Firebase", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    // Failed to update Firebase
+                    Toast.makeText(context, "Failed to update $key: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(context, "User is not authenticated", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun updateFirebaseUsername(newUsername: String) {
