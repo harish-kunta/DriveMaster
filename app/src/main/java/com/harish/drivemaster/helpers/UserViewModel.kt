@@ -60,7 +60,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         val userRef = userDatabase.child(userId)
         userRef.keepSynced(true)
 
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _userName.value = snapshot.getValue(NAME, "User Name")
                 _userEmail.value = snapshot.getValue(EMAIL, "user@example.com")
@@ -79,7 +79,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         listenForChanges(
             userRef.child(HEARTS_REF).child(LAST_REGEN_TIME_REF),
             _lastRegenTime,
-            System.currentTimeMillis()
+            0
         )
         listenForCompletedLevels(userRef.child(COMPLETED_LEVELS_REF))
     }

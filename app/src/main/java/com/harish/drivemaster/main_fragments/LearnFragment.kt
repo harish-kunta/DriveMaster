@@ -102,7 +102,7 @@ class LearnFragment : Fragment() {
         val hoursElapsed = elapsedTime / REGEN_INTERVAL_MS
 
         if (hoursElapsed > 0 && (userViewModel.heartsLeft.value ?: 0) < MAX_HEARTS) {
-            val newHearts = minOf(userViewModel.heartsLeft.value ?: 0 + hoursElapsed.toInt(), MAX_HEARTS)
+            val newHearts = minOf((userViewModel.heartsLeft.value ?: 0) + hoursElapsed.toInt(), MAX_HEARTS)
             userViewModel.saveHeartsData(newHearts, currentTime)
         }
     }

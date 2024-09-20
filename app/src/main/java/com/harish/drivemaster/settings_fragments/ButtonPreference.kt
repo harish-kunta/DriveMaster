@@ -6,6 +6,9 @@ import android.util.AttributeSet
 import androidx.preference.Preference
 import android.widget.Button
 import androidx.preference.PreferenceViewHolder
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.EntryActivity
@@ -17,10 +20,21 @@ class ButtonPreference @JvmOverloads constructor(
 ) : Preference(context, attrs, defStyleAttr) {
 
     private val auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     init {
         layoutResource = R.layout.sign_out_button_layout
         auth = FirebaseAuth.getInstance()
+        configureGoogleSignIn()
+    }
+
+    private fun configureGoogleSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(context, gso)
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
@@ -36,6 +50,7 @@ class ButtonPreference @JvmOverloads constructor(
 
     private fun onButtonClick() {
         //sign out and redirect to sign in activity
+        googleSignInClient.signOut()
         auth.signOut().also {
             val signInIntent = Intent(context, EntryActivity::class.java)
             context.startActivity(signInIntent)

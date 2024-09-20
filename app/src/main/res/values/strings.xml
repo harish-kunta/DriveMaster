@@ -30,4 +30,6 @@
     <string name="title_activity_main_settings">MainSettingsActivity</string>
     <string name="title_activity_lesson_complete">LessonCompleteActivity</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
+
+    <string name="default_web_client_id">63749056996-pml55b1g3b9qg3qrevv7suacimubec1u.apps.googleusercontent.com</string>
 </resources>
