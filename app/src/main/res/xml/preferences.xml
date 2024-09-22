@@ -22,10 +22,10 @@
             android:layout="@layout/custom_preference_screen_background"
             android:title="Profile"></PreferenceScreen>
 
-        <PreferenceScreen
-            android:key="notifications_screen"
-            android:layout="@layout/custom_preference_screen_background"
-            android:title="Notifications"></PreferenceScreen>
+<!--        <PreferenceScreen-->
+<!--            android:key="notifications_screen"-->
+<!--            android:layout="@layout/custom_preference_screen_background"-->
+<!--            android:title="Notifications"></PreferenceScreen>-->
 
     </PreferenceCategory>
 
@@ -35,13 +35,15 @@
         android:key="sign_out_button"
         android:title="Sign Out" />
 
-    <Preference
+    <com.harish.drivemaster.settings_fragments.LinkPreference
         android:key="terms_of_service"
         android:layout="@layout/preference_text_layout"
-        android:title="Terms of Service" />
-    <Preference
+        android:title="Terms of Service"
+        android:summary="https://harish-kunta.github.io/DriveMasterWebsite/terms-of-service.html"/>
+    <com.harish.drivemaster.settings_fragments.LinkPreference
         android:key="privacy_policy"
         android:layout="@layout/preference_text_layout"
-        android:title="Privacy Policy" />
+        android:title="Privacy Policy"
+        android:summary="https://harish-kunta.github.io/DriveMasterWebsite/privacy-policy.html"/>
 
 </PreferenceScreen>
