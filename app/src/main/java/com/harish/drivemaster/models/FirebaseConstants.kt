@@ -15,6 +15,7 @@ class FirebaseConstants {
         const val PROFILE_IMAGE_URL = "profileImageUrl"
         const val NAME = "name"
         const val EMAIL = "email"
-
+        const val USER_JOINED = "signUpTimestamp"
+        const val UID = "uid"
     }
 }

@@ -6,15 +6,10 @@
         android:icon="@drawable/ic_learn"
         android:title="Learn" />
 
-    <item
-        android:id="@+id/nav_progress"
-        android:icon="@drawable/ic_progress"
-        android:title="Progress" />
-
-    <item
-        android:id="@+id/nav_leaderboard"
-        android:icon="@drawable/ic_leaderboard"
-        android:title="Leaderboard" />
+<!--    <item-->
+<!--        android:id="@+id/nav_leaderboard"-->
+<!--        android:icon="@drawable/ic_leaderboard"-->
+<!--        android:title="Leaderboard" />-->
 
     <item
         android:id="@+id/nav_profile"

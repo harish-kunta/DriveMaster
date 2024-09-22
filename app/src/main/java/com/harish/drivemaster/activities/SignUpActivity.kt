@@ -17,6 +17,10 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.harish.drivemaster.R
+import com.harish.drivemaster.models.FirebaseConstants.Companion.EMAIL
+import com.harish.drivemaster.models.FirebaseConstants.Companion.NAME
+import com.harish.drivemaster.models.FirebaseConstants.Companion.UID
+import com.harish.drivemaster.models.FirebaseConstants.Companion.USER_JOINED
 
 class SignUpActivity : AppCompatActivity() {
 
@@ -106,11 +110,13 @@ class SignUpActivity : AppCompatActivity() {
             val userId = it.uid
             val userRef = database.getReference("users/$userId")
             val username = userName.text.toString()
+            val signUpTimestamp = System.currentTimeMillis() / 1000 // Unix time in seconds
 
             val userData = mapOf(
-                "name" to (username.takeIf { it.isNotEmpty() } ?: user.displayName),
-                "email" to user.email,
-                // Initialize other fields as necessary
+                NAME to (username.takeIf { it.isNotEmpty() } ?: user.displayName),
+                EMAIL to user.email,
+                UID to user.uid,
+                USER_JOINED to signUpTimestamp
             )
 
             userRef.setValue(userData).addOnCompleteListener { dbTask ->
@@ -129,7 +135,7 @@ class SignUpActivity : AppCompatActivity() {
         val email = userEmailAddress.text.toString().trim()
         val password = userPassword.text.toString().trim()
 
-        if (email.isNotEmpty() && password.isNotEmpty()) {
+        if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {

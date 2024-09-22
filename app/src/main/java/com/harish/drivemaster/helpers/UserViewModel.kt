@@ -22,6 +22,7 @@ import com.harish.drivemaster.models.FirebaseConstants.Companion.POINTS_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.PROFILE_IMAGE_URL
 import com.harish.drivemaster.models.FirebaseConstants.Companion.STREAK_REF
 import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.USER_JOINED
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -36,6 +37,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val _profileImageUrl = MutableLiveData<String>()
     private val _userName = MutableLiveData<String>()
     private val _userEmail = MutableLiveData<String>()
+    private val _userJoined = MutableLiveData<Long>()
     private val _xp = MutableLiveData<Int>()
 
     val streak: LiveData<Int> = _streak
@@ -45,6 +47,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     val profileImageUrl: LiveData<String> = _profileImageUrl
     val userName: LiveData<String> = _userName
     val userEmail: LiveData<String> = _userEmail
+    val userJoined: LiveData<Long> = _userJoined
     val xp: LiveData<Int> = _xp
 
     private var dataLoaded = false
@@ -64,6 +67,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _userName.value = snapshot.getValue(NAME, "User Name")
                 _userEmail.value = snapshot.getValue(EMAIL, "user@example.com")
+                _userJoined.value = snapshot.child(USER_JOINED).getValue(Long::class.java)
                 _profileImageUrl.value = snapshot.getValue(PROFILE_IMAGE_URL)
                 _streak.value = snapshot.getNestedValue(STREAK_REF, CURRENT_STREAK_REF, 0)
                 _xp.value = snapshot.getValue(POINTS_REF, 0)

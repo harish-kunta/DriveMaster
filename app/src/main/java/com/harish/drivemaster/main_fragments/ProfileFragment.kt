@@ -25,21 +25,18 @@ import com.harish.drivemaster.R
 import com.harish.drivemaster.activities.SettingsActivity
 import com.harish.drivemaster.helpers.UserViewModel
 import de.hdodenhof.circleimageview.CircleImageView
-
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ProfileFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
     private lateinit var userViewModel: UserViewModel
 
     // UI Components
     private lateinit var settingsIcon: ImageView
     private lateinit var userNameTextView: TextView
     private lateinit var userEmailTextView: TextView
+    private lateinit var userJoinedTextView: TextView
     private lateinit var streakValue: TextView
     private lateinit var xpValue: TextView
     private lateinit var profileImageView: CircleImageView
@@ -52,10 +49,6 @@ class ProfileFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
@@ -80,6 +73,10 @@ class ProfileFragment : Fragment() {
 
         userViewModel.userEmail.observe(viewLifecycleOwner, Observer { email ->
             userEmailTextView.text = email
+        })
+
+        userViewModel.userJoined.observe(viewLifecycleOwner, Observer { joined ->
+            userJoinedTextView.text = "Joined " + convertUnixToDate(joined)
         })
 
         userViewModel.profileImageUrl.observe(viewLifecycleOwner, Observer { imageUrl ->
@@ -109,10 +106,23 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // Convert Unix timestamp to a formatted date string like "September 2024"
+    private fun convertUnixToDate(unixTime: Long): String {
+        // Create a Date object from the Unix timestamp (multiply by 1000 to convert seconds to milliseconds)
+        val date = Date(unixTime * 1000L)
+
+        // Define the date format (full month name and year)
+        val sdf = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+
+        // Format the date and return the result
+        return sdf.format(date)
+    }
+
     private fun initializeUIComponents(view: View) {
         settingsIcon = view.findViewById(R.id.settingsIcon)
         userNameTextView = view.findViewById(R.id.userName)
         userEmailTextView = view.findViewById(R.id.userEmail)
+        userJoinedTextView = view.findViewById(R.id.userJoined)
         profilePictureSection = view.findViewById(R.id.profilePictureSection)
         profileImageView = view.findViewById(R.id.profileImageView)
         editProfileImageButton = view.findViewById(R.id.editProfileImageButton)

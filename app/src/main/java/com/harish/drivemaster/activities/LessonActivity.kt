@@ -50,6 +50,7 @@ class LessonActivity : AppCompatActivity() {
 
     // Data & State Management
     private val questions = mutableListOf<Question>()
+    private val incorrectQuestions = mutableListOf<Question>()
     private var currentQuestionIndex = 0
     private var correctAnswer: String? = null
     private lateinit var auth: FirebaseAuth
@@ -338,6 +339,11 @@ class LessonActivity : AppCompatActivity() {
         } else {
             SoundUtil.getInstance(this).playFailureSound()
             loseHeart()
+
+            // Add the incorrect question to the list
+            questions[currentQuestionIndex - 1].let {
+                incorrectQuestions.add(it)
+            }
         }
         updateCheckButton(isCorrect)
     }
@@ -450,9 +456,36 @@ class LessonActivity : AppCompatActivity() {
             }
         })
     }
+    private fun completeLevel() {
+        if (incorrectQuestions.isNotEmpty()) {
+            // Show incorrect questions for review
+            showIncorrectQuestionsForReview()
+        } else {
+            // Proceed to level completion if there are no incorrect answers
+            proceedToLevelCompletion()
+        }
+    }
+
+    private fun showIncorrectQuestionsForReview() {
+        // Reset the question index to show incorrect questions
+        currentQuestionIndex = 0
+
+        // Replace the question list with the incorrect ones
+        questions.clear()
+        questions.addAll(incorrectQuestions)
+
+        // Clear the incorrect questions list to prevent looping
+        incorrectQuestions.clear()
+
+        // Update the UI to start showing incorrect questions
+        Toast.makeText(this, "Reviewing Incorrect Answers", Toast.LENGTH_SHORT).show()
+        showNextQuestion()
+    }
+
+
 
     // Mark the current level as completed and unlock the next level
-    private fun completeLevel() {
+    private fun proceedToLevelCompletion() {
         updatePointsInDatabase()
         updateLevelCompletion()
         checkAndUpdateStreak()

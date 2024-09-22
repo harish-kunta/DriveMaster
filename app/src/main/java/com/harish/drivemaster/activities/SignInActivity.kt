@@ -18,11 +18,16 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.harish.drivemaster.R
+import com.harish.drivemaster.models.FirebaseConstants.Companion.EMAIL
+import com.harish.drivemaster.models.FirebaseConstants.Companion.NAME
+import com.harish.drivemaster.models.FirebaseConstants.Companion.UID
 import com.harish.drivemaster.models.FirebaseConstants.Companion.USERS_REF
+import com.harish.drivemaster.models.FirebaseConstants.Companion.USER_JOINED
 
 class SignInActivity : AppCompatActivity() {
 
@@ -103,13 +108,53 @@ class SignInActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    checkIfUserExists(auth.currentUser?.uid)
                 } else {
                     Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
+    }
+
+    private fun checkIfUserExists(uid: String?) {
+        if (uid == null) return
+        database.getReference(USERS_REF).child(uid).get().addOnSuccessListener {
+            if (it.exists()) {
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            } else {
+                // User doesn't exist, save new user info
+                saveNewUserToDatabase(auth.currentUser)
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, it.message, Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    private fun saveNewUserToDatabase(user: FirebaseUser?) {
+        user?.let {
+            val userId = it.uid
+            val userRef = database.getReference("users/$userId")
+            val username = user.displayName
+            val signUpTimestamp = System.currentTimeMillis() / 1000 // Unix time in seconds
+
+            val userData = mapOf(
+                NAME to user.displayName,
+                EMAIL to user.email,
+                UID to user.uid,
+                USER_JOINED to signUpTimestamp
+            )
+
+            userRef.setValue(userData).addOnCompleteListener { dbTask ->
+                if (dbTask.isSuccessful) {
+                    Toast.makeText(this, "Sign-up successful!", Toast.LENGTH_SHORT).show()
+                    openWelcomePage(username.toString())
+                } else {
+                    Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun signIn() {
@@ -200,6 +245,13 @@ class SignInActivity : AppCompatActivity() {
         } else {
             NotificationManagerCompat.from(this).areNotificationsEnabled()
         }
+    }
+
+    // open welcome page
+    fun openWelcomePage(name: String) {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }
 
