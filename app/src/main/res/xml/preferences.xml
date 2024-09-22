@@ -35,7 +35,6 @@
         android:key="sign_out_button"
         android:title="Sign Out" />
 
-
     <Preference
         android:key="terms_of_service"
         android:layout="@layout/preference_text_layout"

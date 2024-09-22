@@ -12,18 +12,18 @@
             android:key="change_name"
             android:title="Name" />
 
-        <com.harish.drivemaster.settings_fragments.CustomEditTextPreference
-            android:defaultValue="Your password"
-            android:dialogTitle="Enter new password"
-            android:inputType="textPassword"
-            android:key="change_password"
-            android:title="Password" />
+<!--        <com.harish.drivemaster.settings_fragments.CustomEditTextPreference-->
+<!--            android:defaultValue="Your password"-->
+<!--            android:dialogTitle="Enter new password"-->
+<!--            android:inputType="textPassword"-->
+<!--            android:key="change_password"-->
+<!--            android:title="Password" />-->
 
 
-<!--        <com.harish.drivemaster.settings_fragments.ButtonPreference-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:key="delete_account"-->
-<!--            android:title="Delete Account" />-->
+        <com.harish.drivemaster.settings_fragments.ButtonPreference
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:key="delete_account"
+            android:title="Delete Account" />
 
 </PreferenceScreen>
