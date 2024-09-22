@@ -8,7 +8,7 @@ import com.google.firebase.database.ValueEventListener
 
 class FirebasePreferences(private val userId: String) {
 
-    private val database: DatabaseReference = FirebaseDatabase.getInstance().getReference("users").child(userId).child("preferences")
+    private val database: DatabaseReference = FirebaseDatabase.getInstance().getReference("users").child(userId)
 
     // Function to get a preference value based on the key
     fun getPreference(key: String, callback: (String?) -> Unit) {

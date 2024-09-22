@@ -36,7 +36,12 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
         editText = holder.findViewById(R.id.custom_edit_text) as EditText
 
         // Set the current value to the EditText
-        editText.setText(sharedPreferences?.getString(key, ""))
+//        editText.setText(firebasePreferences?.getPreference(key) { value ->
+//            value?.let {
+//                text = it
+//                summary = it
+//            }
+//        })
 
         // Set listener for the "Done" action on the keyboard
         editText.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
@@ -47,7 +52,7 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
                     summary = newValue  // Optionally update the summary
                     // Update Firebase based on the key
                     when (key) {
-                        "change_name" -> {
+                        "name" -> {
                             // Save the new value to Firebase
                             firebasePreferences.setPreference(key, newValue) { success ->
                                 if (success) {
@@ -86,6 +91,7 @@ class CustomEditTextPreference(context: Context, attrs: AttributeSet?) :
                 value?.let {
                     text = it
                     summary = it
+                    editText.setText(it)
                 }
             }
         } else {
